@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Archivo 64 (a64) © 2026 Ignacio Dubois. Todos los derechos reservados. Ver LICENSE. -->
 <title>Archivo 64</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -30,6 +35,10 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
 html,body{background:var(--bg)}
 body{color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px))}
 button,select,textarea,input{font:inherit;color:inherit}
@@ -230,6 +239,8 @@ details.more p{color:var(--mute)}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
+</head>
+<body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -1046,3 +1057,5 @@ Engine.init();boot();
 if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude|claudeusercontent/.test(location.hostname)){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 })();
 </script>
+</body>
+</html>
