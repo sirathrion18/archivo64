@@ -1,0 +1,11 @@
+Copyright (c) 2026 Ignacio Dubois (sirathrion18). Todos los derechos reservados.
+
+Archivo 64 (a64) — su código, su diseño, su logo y sus textos — es obra de Ignacio Dubois.
+No se otorga ningún permiso para copiar, modificar, distribuir ni usar este código o
+cualquier parte de él, con o sin fines comerciales, sin autorización previa y por escrito
+del autor.
+
+Que el código sea visible en este repositorio no implica ninguna licencia de uso.
+
+Librerías de terceros que la app carga desde su origen, con sus propias licencias:
+chess.js (BSD-2-Clause) y Stockfish.js (GPL-3.0).

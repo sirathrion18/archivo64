@@ -29,6 +29,10 @@ Tu archivo de ajedrez: jugás contra el Analista Ferreyra, traés tus partidas d
 
 Las partidas de Lichess se vuelven a bajar siempre. Lo que jugás contra el analista y tus ejercicios viven en el dispositivo: en **Progreso → Descargar respaldo**, y subí el archivo a esta carpeta de Drive.
 
+## Derechos
+
+© 2026 Ignacio Dubois. Todos los derechos reservados. Ver `LICENSE`: que el código esté a la vista no da permiso para copiarlo ni usarlo.
+
 ## Reglas
 
 Solo partidas terminadas o contra el analista. Usar ayuda externa en una partida en vivo de Lichess está prohibido.

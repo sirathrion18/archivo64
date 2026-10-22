@@ -1,5 +1,5 @@
 // Archivo 64 — guarda la app para que abra rápido y funcione sin conexión.
-const CACHE = "a64-v1";
+const CACHE = "a64-v2";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png",
   "https://cdn.jsdelivr.net/npm/chess.js@0.10.3/chess.js",
   "https://cdn.jsdelivr.net/npm/stockfish@10.0.2/src/stockfish.asm.js"];
