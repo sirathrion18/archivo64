@@ -1,0 +1,1044 @@
+<title>Archivo 64</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0E0E0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Archivo 64">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: app de una mano. Barra superior con el logo pixel, cuatro pantallas
+   (Inicio, Jugar, Revisar, Progreso) y barra de navegación fija abajo.
+   En compu, el tablero va a la izquierda y la mesa del analista a la derecha. */
+@property --tilt{syntax:"<angle>";inherits:true;initial-value:0deg}
+:root{
+  --bg:#0E0E0E; --panel:#151515; --panel2:#1C1C1B; --line:#2B2A28; --rule:#5A5A5A;
+  --fg:#EDEAE4; --mute:#A6A29B; --acc:#FF6A00; --acc-ink:#0E0E0E;
+  --green:#86AC92; --bronze:#C99350; --alert:#E5573F; --alert-bg:#2A1210;
+  --sq-l:#E6E1D7; --sq-d:#8E8B85; --grid:rgba(255,106,0,.26);
+  --f-title:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --f-body:"Inter","Helvetica Neue",Arial,sans-serif;
+  --f-code:"Agency FB","Barlow Condensed","Oswald","Arial Narrow",sans-serif;
+  --navh:64px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px))}
+button,select,textarea,input{font:inherit;color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* Barra superior */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(14,14,14,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{height:22px;width:auto;display:block}
+.brand span{font-family:var(--f-code);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.seal{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-code);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.seal::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--bronze)}
+.seal.on::before{background:var(--acc);box-shadow:0 0 0 3px rgba(255,106,0,.18)}
+.tg{background:transparent;border:1px solid var(--rule);border-radius:3px;padding:4px 9px;font-family:var(--f-code);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);cursor:pointer;min-height:32px}
+.tg[aria-pressed="true"]{color:var(--acc);border-color:var(--acc)}
+.barr{display:flex;align-items:center;gap:10px}
+
+/* Navegación */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0B0B0B;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.nav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--navh)}
+.nav button{background:none;border:none;display:grid;place-items:center;align-content:center;gap:3px;cursor:pointer;color:var(--mute);font-family:var(--f-code);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;position:relative}
+.nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
+.nav button[aria-current="page"]{color:var(--acc)}
+.nav button[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;background:var(--acc)}
+.nav .dotn{position:absolute;top:10px;right:calc(50% - 18px);width:7px;height:7px;border-radius:50%;background:var(--alert)}
+
+main .wrap{padding-block:18px 28px}
+.view{display:grid;gap:16px}
+.grid{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:grid;gap:12px;min-width:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+
+/* Bloques */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:16px;min-width:0}
+.label{font-family:var(--f-code);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 8px;display:flex;justify-content:space-between;gap:10px}
+.label b{color:var(--acc);font-weight:600}
+h2.t{margin:0;font-family:var(--f-title);font-size:24px;font-weight:700;line-height:1.15;text-wrap:balance}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{background:var(--panel2);border:1px solid var(--rule);color:var(--fg);padding:9px 14px;border-radius:3px;cursor:pointer;font-weight:500;font-size:14px;min-height:42px}
+.btn:hover{border-color:var(--fg)}
+.btn.main{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);font-weight:600}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.icon{font-size:18px;padding:6px 10px}
+.btn.wide{width:100%}
+textarea,input[type=text],select{background:var(--bg);border:1px solid var(--rule);border-radius:3px;padding:9px 10px;min-height:42px;max-width:100%}
+textarea{width:100%;min-height:84px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;resize:vertical}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fields label{display:grid;gap:4px;font-family:var(--f-code);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.help{font-size:13px;color:var(--mute);margin:8px 0 0}
+.help b{color:var(--fg);font-weight:500}
+.err{color:var(--alert)}
+.switch{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.switch input{accent-color:var(--acc);width:18px;height:18px}
+.seg{display:inline-grid;grid-auto-flow:column;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.seg button{background:none;border:none;padding:8px 16px;cursor:pointer;font-family:var(--f-code);font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink)}
+
+/* Inicio */
+.hero{display:grid;gap:10px;padding:22px 18px;border:1px solid var(--line);border-radius:4px;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(237,234,228,.03) 11px 12px),var(--panel)}
+.hero svg{width:min(240px,60%);height:auto;display:block}
+.hero p{margin:0;color:var(--mute);max-width:56ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.stat{border:1px solid var(--line);border-radius:3px;padding:10px 12px;background:var(--panel2)}
+.stat .k{font-family:var(--f-code);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.stat .v{font-family:var(--f-code);font-size:30px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:15px;color:var(--mute);font-weight:500}
+.order{border:1px solid var(--acc);border-radius:4px;padding:16px;background:linear-gradient(var(--panel),var(--panel)) padding-box;position:relative}
+.order .num{font-family:var(--f-code);font-size:13px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase}
+.order p{margin:6px 0 0;font-size:16.5px;font-weight:500;max-width:60ch}
+.order small{display:block;margin-top:8px;color:var(--mute);font-size:13px}
+.sync{font-size:13px;color:var(--mute)}
+.sync b{color:var(--fg);font-weight:500}
+
+/* Tablero */
+.stage{position:relative;perspective:1150px;perspective-origin:50% -40%;padding-top:calc(7% * var(--k,0))}
+.board{position:relative;width:100%;aspect-ratio:1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
+  transform:rotateX(var(--tilt));transform-origin:50% 100%;transform-style:preserve-3d;
+  border:3px solid #2E2C29;box-shadow:0 0 0 1px var(--acc);user-select:none;-webkit-user-select:none;touch-action:manipulation;background:var(--sq-d)}
+.sq{position:relative;transform-style:preserve-3d;cursor:pointer;box-shadow:inset 0 0 0 .5px var(--grid)}
+.sq.l{background:var(--sq-l)} .sq.d{background:var(--sq-d)}
+.sq.last::before,.sq.sel::before,.sq.chk::before,.sq.hl::before{content:"";position:absolute;inset:0}
+.sq.last::before{background:rgba(255,106,0,.26)}
+.sq.hl::before{background:rgba(255,106,0,.5);animation:blink 1.4s ease-in-out infinite}
+.sq.sel::before{background:rgba(255,106,0,.55)}
+.sq.chk::before{background:radial-gradient(circle,rgba(229,87,63,.95) 0 35%,rgba(229,87,63,0) 72%)}
+.sq.dot::after{content:"";position:absolute;left:35%;top:35%;width:30%;height:30%;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px rgba(14,14,14,.35);z-index:3}
+.sq.cap::after{content:"";position:absolute;inset:5%;border-radius:50%;border:4px solid var(--acc);z-index:3}
+.sq i{position:absolute;font-style:normal;font-family:var(--f-code);font-size:11px;font-weight:700;line-height:1;pointer-events:none;color:#B4520C}
+.sq i.rk{top:2px;left:3px} .sq i.fl{bottom:2px;right:3px}
+.sh{position:absolute;left:20%;right:20%;bottom:10%;height:22%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.45),rgba(0,0,0,0));pointer-events:none;opacity:var(--k,0)}
+.risk{position:absolute;inset:8%;border-radius:50%;border:3px dashed var(--alert);pointer-events:none;z-index:2;animation:spin 9s linear infinite}
+.pc{position:absolute;left:4%;width:92%;bottom:calc(2% + 13% * var(--k,0));height:calc(96% + 36% * var(--k,0));transform-origin:50% 100%;
+  transform:translate(var(--tx,0px),var(--ty,0px)) rotateX(calc(var(--tilt) * -1));z-index:4;cursor:pointer}
+.pc svg{width:100%;height:100%;display:block;overflow:visible}
+.pc.moving{transition:transform .38s cubic-bezier(.3,.7,.3,1)}
+.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.grip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:3px;padding:8px 12px;cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,106,0,.10) 3px 4px),var(--panel2)}
+.grip .ridge{width:28px;height:14px;background:repeating-linear-gradient(180deg,var(--acc) 0 2px,transparent 2px 5px);opacity:.8}
+.grip span{font-family:var(--f-code);font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);flex:1}
+.grip b{font-family:var(--f-code);font-size:16px;color:var(--acc);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Efectos */
+.fx{position:absolute;inset:0;pointer-events:none;z-index:20;overflow:hidden}
+.portal{position:absolute;left:50%;top:50%;width:20%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%) scale(0);border:6px solid var(--acc);box-shadow:0 0 0 3px rgba(255,106,0,.25),inset 0 0 0 10px rgba(255,106,0,.18);animation:portal 1s ease-out forwards}
+.poda{position:absolute;inset:0;display:grid;place-items:center;animation:fade 1.1s ease-out forwards}
+.poda::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;background:var(--acc);transform-origin:left;animation:sweep .5s ease-out forwards}
+.poda span{font-family:var(--f-code);font-weight:700;font-size:clamp(20px,5vw,30px);letter-spacing:.14em;color:var(--acc);border:3px solid var(--acc);padding:4px 14px;background:rgba(14,14,14,.82);transform:rotate(-7deg)}
+@keyframes portal{0%{transform:translate(-50%,-50%) scale(0);opacity:1}70%{opacity:1}100%{transform:translate(-50%,-50%) scale(7);opacity:0}}
+@keyframes fade{0%,60%{opacity:1}100%{opacity:0}}
+@keyframes sweep{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes blink{50%{opacity:.35}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--alert)}}
+.stage.nexo .board{box-shadow:0 0 0 2px var(--alert);animation:pulse 1.2s ease-in-out infinite}
+.nexobox{position:absolute;left:4%;right:4%;bottom:4%;z-index:30;background:var(--alert-bg);border:2px solid var(--alert);border-radius:4px;padding:14px;display:grid;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.nexobox .t{font-family:var(--f-code);font-size:17px;font-weight:700;letter-spacing:.14em;color:var(--alert);display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.nexobox .t::before{content:"";border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid var(--alert)}
+.nexobox p{margin:0}
+
+/* Analista */
+.agent{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.badge{width:50px;height:50px;border-radius:50%;border:2px solid var(--acc);display:grid;place-items:center;font-family:var(--f-code);font-weight:700;font-size:19px;color:var(--acc);background:var(--panel2);position:relative}
+.badge::after{content:"";position:absolute;inset:4px;border-radius:50%;border:1px dashed rgba(255,106,0,.5)}
+.agent.thinking .badge::after{animation:spin 2.4s linear infinite;border-style:solid;border-color:var(--acc) transparent transparent transparent}
+.agent .who{font-family:var(--f-code);font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.agent .who b{color:var(--fg);font-weight:600}
+.agent .say{margin:4px 0 0;font-size:15.5px;max-width:60ch}
+.say em{font-style:normal;color:var(--acc);font-weight:600}
+.say .bad{color:var(--alert);font-weight:600}
+.legal{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.legal span,.tag{font-family:var(--f-code);font-size:15px;letter-spacing:.04em;border:1px solid var(--rule);padding:1px 7px;border-radius:2px}
+
+/* Ficha */
+.card h2{margin:0;font-family:var(--f-title);font-size:27px;font-weight:700;line-height:1.1;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.card p{margin:8px 0 0;max-width:62ch}
+.best b{color:var(--acc)}
+details.more{margin-top:10px;border-top:1px dashed var(--rule);padding-top:8px}
+details.more summary,details.fold>summary{cursor:pointer;font-family:var(--f-code);letter-spacing:.12em;text-transform:uppercase;font-size:14px;color:var(--acc);list-style:none}
+details.more summary::-webkit-details-marker,details.fold>summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+ "} details.more[open] summary::before{content:"− "}
+details.fold>summary{color:var(--mute)} details.fold>summary::before{content:"▸ "} details.fold[open]>summary::before{content:"▾ "}
+details.more p{color:var(--mute)}
+.chip{display:inline-flex;align-items:center;font-family:var(--f-code);font-size:14px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:3px 9px;border-radius:2px;border:1px solid currentColor;white-space:nowrap}
+.v-mejor{color:var(--acc)} .v-buena{color:var(--green)} .v-impr{color:var(--bronze)} .v-error{color:var(--alert)} .v-grave{color:#fff;background:var(--alert);border-color:var(--alert)} .v-pend{color:var(--mute)} .v-time{color:var(--fg)} .v-fast{color:var(--alert)}
+.tip{margin-top:10px;padding:10px 12px;border:1px solid var(--rule);border-radius:3px;font-size:14px}
+.tip b{font-family:var(--f-code);letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-right:6px}
+.progress{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.level{display:flex;gap:3px;margin-top:6px}
+.level span{flex:1;height:6px;background:var(--line);border-radius:1px}
+.level span.on{background:var(--acc)}
+.moves{display:grid;grid-template-columns:2.6em 1fr 1fr;gap:2px 4px;max-height:260px;overflow-y:auto;font-variant-numeric:tabular-nums}
+.moves .num{font-family:var(--f-code);color:var(--mute);font-size:14px;align-self:center}
+.mv{text-align:left;background:transparent;border:1px solid transparent;border-radius:2px;padding:4px 8px;cursor:pointer;font-weight:500;font-size:14px;display:flex;justify-content:space-between;gap:6px}
+.mv:hover{border-color:var(--rule)}
+.mv.on{background:var(--acc);color:var(--acc-ink)}
+.mk{font-family:var(--f-code);font-weight:700;font-size:13px}
+.mk.v-grave{background:none;color:var(--alert)}
+.mv.on .mk{color:var(--acc-ink)}
+.navb{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+
+/* Lista de partidas */
+.games{display:grid;gap:6px}
+.game{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:10px 12px;cursor:pointer;width:100%}
+.game:hover{border-color:var(--rule)}
+.game.on{border-color:var(--acc)}
+.game .res{font-family:var(--f-code);font-weight:700;font-size:18px;width:28px;text-align:center}
+.res.w{color:var(--green)} .res.l{color:var(--alert)} .res.d{color:var(--mute)}
+.game .ttl{font-weight:600;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.game .sub{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.game .st{font-family:var(--f-code);font-size:13px;letter-spacing:.06em;color:var(--mute);text-align:right;white-space:nowrap}
+
+/* Progreso */
+.chart{width:100%;height:auto;display:block}
+.chart text{font-family:var(--f-code);font-size:11px;fill:var(--mute);letter-spacing:.04em}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.ac{border:1px dashed var(--rule);border-radius:3px;padding:10px;display:grid;gap:4px;color:var(--mute)}
+.ac b{font-family:var(--f-code);font-size:15px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.ac span{font-size:12.5px}
+.ac.on{border-style:solid;border-color:var(--acc);color:var(--fg)}
+.ac.on b{color:var(--acc)}
+.ac .stamp{font-family:var(--f-code);font-size:11px;letter-spacing:.12em;color:var(--acc)}
+
+/* Ventana al futuro */
+.future{border-color:var(--acc)}
+.future .line{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0 0;font-family:var(--f-code);font-size:16px}
+.future .line span{padding:1px 6px;border-radius:2px;color:var(--mute)}
+.future .line span.on{background:var(--acc);color:var(--acc-ink)}
+.future .line span.done{color:var(--fg)}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--panel2);border:1px solid var(--acc);border-radius:4px;padding:10px 16px;font-size:14px;max-width:min(92vw,440px);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast b{color:var(--acc);font-family:var(--f-code);letter-spacing:.12em;text-transform:uppercase;margin-right:6px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gw" x1="0" x2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".38" stop-color="#F6F0E4"/><stop offset=".7" stop-color="#E2D6C0"/><stop offset="1" stop-color="#A8977A"/></linearGradient>
+    <linearGradient id="gb" x1="0" x2="1"><stop offset="0" stop-color="#6B4E3D"/><stop offset=".3" stop-color="#3A291F"/><stop offset=".7" stop-color="#1A120D"/><stop offset="1" stop-color="#050302"/></linearGradient>
+    <linearGradient id="gloss" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".22" stop-color="#fff" stop-opacity=".55"/><stop offset=".34" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  </defs>
+</svg>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand"><span id="logoS"></span><span>Archivo 64</span></div>
+    <div class="barr">
+      <span class="seal" id="engSeal">Motor</span>
+      <button class="tg" id="tSnd" aria-pressed="true">Sonido</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- INICIO -->
+    <section class="view" id="v-inicio">
+      <div class="hero">
+        <div id="logoL"></div>
+        <p id="hello">Tu archivo de ajedrez. Jugás, revisás y el analista te corrige.</p>
+      </div>
+      <div class="order" id="order"></div>
+      <div class="panel">
+        <p class="label"><span>Tu estado</span><b id="lUser"></b></p>
+        <div class="stats" id="stats"></div>
+        <div class="fields" style="margin-top:12px" id="userBox">
+          <label for="iUser">Tu usuario de Lichess<input type="text" id="iUser" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="tu usuario"></label>
+          <button class="btn main" id="bSync" style="align-self:end">Traer mis partidas</button>
+        </div>
+        <p class="sync" id="syncTxt"></p>
+        <div class="progress" id="bgBar" hidden><span></span></div>
+      </div>
+      <div class="two">
+        <div class="panel" id="lastGame"></div>
+        <div class="panel" id="dailyEx"></div>
+      </div>
+    </section>
+
+    <!-- JUGAR -->
+    <section class="view" id="v-jugar" hidden>
+      <div class="row" style="justify-content:space-between">
+        <div class="seg" role="group" aria-label="Modo">
+          <button id="mGame" aria-pressed="true">Partida</button>
+          <button id="mEx" aria-pressed="false">Ejercicios</button>
+        </div>
+        <span class="help" style="margin:0" id="exCount"></span>
+      </div>
+      <div class="grid">
+        <div class="col">
+          <div class="stage" id="pStage">
+            <div class="board" id="pBoard" aria-label="Tablero"></div>
+            <div class="fx" id="pFx"></div>
+            <div class="nexobox" id="pNexo" hidden></div>
+          </div>
+          <div class="grip" data-grip role="slider" tabindex="0" aria-label="Inclinación del tablero" aria-valuemin="0" aria-valuemax="62"><i class="ridge"></i><span>Arrastrá ↕ para inclinar</span><b data-deg>0°</b></div>
+          <div class="row" id="pBtns">
+            <button class="btn main" id="pHint">Pista</button>
+            <button class="btn" id="pFutureBtn">Ventana al futuro</button>
+            <button class="btn" id="pUndo">Deshacer</button>
+            <button class="btn" id="pFlip">Girar</button>
+          </div>
+          <div class="row" id="xBtns" hidden>
+            <button class="btn" id="xSol">Ver solución</button>
+            <button class="btn main" id="xNext">Siguiente ejercicio</button>
+          </div>
+        </div>
+        <div class="col">
+          <div class="panel">
+            <div class="agent" id="pAgent">
+              <div class="badge" aria-hidden="true">AF</div>
+              <div>
+                <div class="who"><b>Analista Ferreyra</b> · <span id="pTurn">—</span></div>
+                <div class="say" id="pSay"></div>
+                <div class="legal" id="pLegal"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel future" id="pFuture" hidden></div>
+          <div class="panel card" id="pFeed"></div>
+          <div class="panel" id="pCtl">
+            <p class="label"><span>Nivel del analista</span><b id="pLvlTxt"></b></p>
+            <div class="level" id="pLvl"></div>
+            <p class="help">Sube si encadenás buenas jugadas y baja si te equivocás seguido.</p>
+            <div class="fields" style="margin-top:12px">
+              <label for="pColor">Jugás con<select id="pColor"><option value="w">Blancas</option><option value="b">Negras</option><option value="r">Al azar</option></select></label>
+              <button class="btn main" id="pNew" style="align-self:end">Nueva partida</button>
+            </div>
+            <label class="switch" style="margin-top:12px"><input type="checkbox" id="pGuard" checked> Frenarme antes de un error</label>
+          </div>
+          <div class="panel" id="pMovesP">
+            <p class="label"><span>Jugadas</span><b id="pCount"></b></p>
+            <div class="moves" id="pMoves"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REVISAR -->
+    <section class="view" id="v-revisar" hidden>
+      <div class="panel" id="rListP">
+        <p class="label"><span>Partidas del archivo</span><b id="rCount"></b></p>
+        <div class="games" id="rList"></div>
+        <details class="fold" style="margin-top:12px">
+          <summary>Pegar una partida (PGN)</summary>
+          <textarea id="pgnIn" spellcheck="false" placeholder="Pegá acá el PGN" style="margin-top:10px"></textarea>
+          <div class="fields" style="margin-top:10px">
+            <label for="pgnSide">Jugaste con<select id="pgnSide"><option value="">Detectar por usuario</option><option value="w">Blancas</option><option value="b">Negras</option></select></label>
+            <button class="btn main" id="bPgn" style="align-self:end">Agregar al archivo</button>
+          </div>
+          <p class="help err" id="pgnErr" hidden></p>
+        </details>
+      </div>
+      <div class="grid" id="rMain" hidden>
+        <div class="col">
+          <div class="stage" id="aStage">
+            <div class="board" id="aBoard" aria-label="Tablero de revisión"></div>
+            <div class="fx" id="aFx"></div>
+          </div>
+          <div class="grip" data-grip role="slider" tabindex="0" aria-label="Inclinación del tablero" aria-valuemin="0" aria-valuemax="62"><i class="ridge"></i><span>Arrastrá ↕ para inclinar</span><b data-deg>0°</b></div>
+          <div class="row" style="font-size:13px;color:var(--mute)"><span><b style="color:var(--alert)">━</b> lo que jugaste</span><span><b style="color:var(--acc)">━</b> lo mejor</span></div>
+        </div>
+        <div class="col">
+          <div class="panel">
+            <div class="agent" id="aAgent">
+              <div class="badge" aria-hidden="true">AF</div>
+              <div>
+                <div class="who"><b>Analista Ferreyra</b> · Revisión</div>
+                <div class="say" id="aSay"></div>
+                <div class="progress"><span id="aProgBar"></span></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel card" id="aCard"></div>
+          <div class="panel future" id="aFuture" hidden></div>
+          <div class="panel" id="aTimes"></div>
+          <div class="panel">
+            <details class="fold" id="aFree">
+              <summary>Ver todas las jugadas</summary>
+              <div class="navb">
+                <button class="btn icon" id="aFirst" aria-label="Inicio">⏮</button>
+                <button class="btn icon" id="aPrev" aria-label="Anterior">◀</button>
+                <button class="btn icon" id="aNext" aria-label="Siguiente">▶</button>
+                <button class="btn icon" id="aLast" aria-label="Final">⏭</button>
+              </div>
+              <div class="moves" id="aMoves"></div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRESO -->
+    <section class="view" id="v-progreso" hidden>
+      <div class="panel">
+        <p class="label"><span>Consignas para tu próxima partida</span><b id="cBase"></b></p>
+        <div class="col" id="consignas"></div>
+      </div>
+      <div class="stats" id="pStats"></div>
+      <div class="two">
+        <div class="panel"><p class="label"><span>Errores por partida, por semana</span></p><div id="chErr"></div></div>
+        <div class="panel"><p class="label"><span>Tu rating en Lichess</span><b id="rtNow"></b></p><div id="chRt"></div></div>
+      </div>
+      <div class="panel">
+        <p class="label"><span>Logros</span><b id="achN"></b></p>
+        <div class="ach" id="ach"></div>
+      </div>
+      <div class="panel">
+        <p class="label"><span>Respaldo</span></p>
+        <p style="margin:0">Tus partidas de Lichess se vuelven a bajar siempre. Lo que jugás contra el analista y tus ejercicios viven en este dispositivo: guardá un respaldo y subilo a la carpeta <b>Archivo 64</b> de tu Drive.</p>
+        <div class="row" style="margin-top:12px">
+          <button class="btn main" id="bExp">Descargar respaldo</button>
+          <label class="btn" for="fImp" style="display:inline-flex;align-items:center">Cargar respaldo</label>
+          <input type="file" id="fImp" accept="application/json,.json" hidden>
+        </div>
+        <p class="help" id="bkTxt"></p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<nav class="nav" aria-label="Secciones">
+  <div class="in">
+    <button data-go="inicio" aria-current="page"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Inicio</button>
+    <button data-go="jugar"><svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M9.5 10h5l1 7h-7zM7 21h10l-1-4H8z"/></svg>Jugar</button>
+    <button data-go="revisar"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg>Revisar</button>
+    <button data-go="progreso"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progreso</button>
+  </div>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/chess.js@0.10.3/chess.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const FILES="abcdefgh",MATE=100000;
+const NAME={p:"Peón",n:"Caballo",b:"Alfil",r:"Torre",q:"Dama",k:"Rey"};
+const NAMEL={p:"peón",n:"caballo",b:"alfil",r:"torre",q:"dama",k:"rey"};
+const TU={p:"tu peón",n:"tu caballo",b:"tu alfil",r:"tu torre",q:"tu dama",k:"tu rey"};
+const CAPT={p:"un peón",n:"un caballo",b:"un alfil",r:"una torre",q:"la dama",k:"el rey"};
+const PV={p:100,n:310,b:330,r:500,q:900,k:0};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ================= Datos ================= */
+const DEF={v:1,user:"",level:2,tilt:34,sound:true,guard:true,games:[],ex:{},ach:{},rating:null,ratings:{},lastSync:0,practice:null,days:[]};
+let S;try{S=Object.assign({},DEF,JSON.parse(ls.get("a64")||"{}"))}catch(e){S=Object.assign({},DEF)}
+let saveT=null;function save(){clearTimeout(saveT);saveT=setTimeout(()=>ls.set("a64",JSON.stringify(S)),250)}
+function gameById(id){return S.games.find(g=>g.id===id)}
+
+/* ================= Logo pixel ================= */
+const GL={a:[".....",".....",".###.","....#",".####","#...#",".####"],"6":["..##.",".#...","#....","####.","#...#","#...#",".###."],"4":["...#.","..##.",".#.#.","#..#.","#####","...#.","...#."]};
+function logoSVG(color,h){let r="",x=0;for(const ch of "a64"){GL[ch].forEach((row,y)=>[...row].forEach((c,i)=>{if(c==="#")r+='<rect x="'+(x+i)+'" y="'+y+'" width="1.02" height="1.02"/>'}));x+=6}
+  return '<svg viewBox="-.5 -.5 18 8" style="height:'+h+'" role="img" aria-label="a64"><g fill="'+(color||"#FF6A00")+'" shape-rendering="crispEdges">'+r+"</g></svg>"}
+$("#logoS").innerHTML=logoSVG("#FF6A00","22px");$("#logoL").innerHTML=logoSVG("#FF6A00","auto");
+
+/* ================= Piezas Staunton de torneo ================= */
+const BASE='<path d="M24 134 C24 126 30 123 37 122 L63 122 C70 123 76 126 76 134 Z"/><ellipse cx="50" cy="134" rx="26" ry="3.6"/><path d="M31 122 C33 117 40 115 50 115 C60 115 67 117 69 122 Z"/>';
+const SHAPES={
+ p:'<path d="M40 115 C43 104 45 96 45.5 89 L54.5 89 C55 96 57 104 60 115 Z"/><ellipse cx="50" cy="89" rx="11" ry="2.8"/><path d="M45 89 C46.5 85 47 83 47.5 81 L52.5 81 C53 83 53.5 85 55 89 Z"/><circle cx="50" cy="70" r="11.5"/>',
+ r:'<path d="M36.5 115 C38.5 100 39.5 87 39.5 74 L60.5 74 C60.5 87 61.5 100 63.5 115 Z"/><ellipse cx="50" cy="74" rx="13" ry="2.8"/><path d="M36 74 L36 52 L42.5 52 L42.5 58.5 L47 58.5 L47 52 L53 52 L53 58.5 L57.5 58.5 L57.5 52 L64 52 L64 74 Z"/><path d="M39 66 L61 66" fill="none" stroke-width="1.2"/>',
+ b:'<path d="M39.5 115 C43.5 101 46 89 46.5 78 L53.5 78 C54 89 56.5 101 60.5 115 Z"/><ellipse cx="50" cy="78" rx="10.5" ry="2.6"/><ellipse cx="50" cy="73" rx="8" ry="2.2"/><path d="M50 31 C63.5 41 64.5 57 57 70 L43 70 C35.5 57 36.5 41 50 31 Z"/><path d="M55.5 43 L46.5 56" fill="none" stroke-width="2.6"/><circle cx="50" cy="26.5" r="4.5"/>',
+ n:'<path d="M37 115 C39 107 40.5 101 41 97 L59 97 C59.5 101 61 107 63 115 Z"/><ellipse cx="50" cy="97" rx="12.5" ry="2.8"/><path d="M41.5 97 C39.5 87 41 78 47 70 C41.5 72 34 73.5 29 69.5 C25 66 26 60 31.5 56 C37.5 51 42.5 43 46 35 L48.5 24 L53.5 32.5 C66.5 34.5 74 49 71 67 C69.5 79 64.5 89 61 97 Z"/><path d="M53.5 33 C62 41 65.5 55 62.5 70 C61.5 77 59.5 84 58 90" fill="none" stroke-width="1.6"/><path d="M30 63.5 C31.5 64.5 33 64.6 34.5 64" fill="none" stroke-width="1.4"/>',
+ q:'<path d="M37.5 115 C42 101 45 87 45.5 74 L54.5 74 C55 87 58 101 62.5 115 Z"/><ellipse cx="50" cy="74" rx="11.5" ry="2.8"/><ellipse cx="50" cy="68" rx="9" ry="2.3"/><path d="M41 67 L33.5 40 L43 51 L46 31.5 L50 47 L54 31.5 L57 51 L66.5 40 L59 67 Z"/><circle cx="33.5" cy="37.5" r="3.4"/><circle cx="46" cy="29" r="3.4"/><circle cx="54" cy="29" r="3.4"/><circle cx="66.5" cy="37.5" r="3.4"/><circle cx="50" cy="42" r="2.6"/>',
+ k:'<path d="M37.5 115 C42 101 45 87 45.5 74 L54.5 74 C55 87 58 101 62.5 115 Z"/><ellipse cx="50" cy="74" rx="11.5" ry="2.8"/><ellipse cx="50" cy="68" rx="9" ry="2.3"/><path d="M41.5 67 C35.5 55 39 44.5 50 44.5 C61 44.5 64.5 55 58.5 67 Z"/><path d="M47.6 44.5 L47.6 36.5 L42 36.5 L42 31.5 L47.6 31.5 L47.6 21 L52.4 21 L52.4 31.5 L58 31.5 L58 36.5 L52.4 36.5 L52.4 44.5 Z"/>'};
+function pieceSVG(p){
+  const w=p.color==="w",fill=w?"url(#gw)":"url(#gb)",stroke=w?"#3A3127":"#000",sh=SHAPES[p.type];
+  return '<svg viewBox="0 0 100 140" preserveAspectRatio="xMidYMax meet"><g fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.7" stroke-linejoin="round">'+BASE+sh+"</g>"
+   +'<g fill="url(#gloss)" stroke="none" opacity="'+(w?.55:.35)+'">'+BASE.replace(/<ellipse[^>]*\/>/,"")+sh.replace(/fill="none"[^/]*/g,'opacity="0"')+"</g>"
+   +'<path d="M31.5 121.6 C38 119.6 62 119.6 68.5 121.6" fill="none" stroke="#FF6A00" stroke-width="1.6"/>'
+   +(p.type==="n"?'<circle cx="41.5" cy="49" r="2.3" fill="'+(w?"#2A2218":"#FF6A00")+'"/>':"")+"</svg>"}
+
+/* ================= Sonido ================= */
+const Sound={ctx:null,
+  c(){if(!S.sound)return null;try{this.ctx=this.ctx||new (window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==="suspended")this.ctx.resume();return this.ctx}catch(e){return null}},
+  tone(f,d,type,vol,at,f2){const c=this.c();if(!c)return;const t=c.currentTime+(at||0),o=c.createOscillator(),g=c.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.12,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.02)},
+  noise(d,vol){const c=this.c();if(!c)return;const b=c.createBuffer(1,Math.floor(c.sampleRate*d),c.sampleRate),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=(Math.random()*2-1)*(1-i/x.length);const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();f.type="lowpass";f.frequency.value=1800;g.gain.value=vol||.25;s.buffer=b;s.connect(f);f.connect(g);g.connect(c.destination);s.start()},
+  stamp(){this.noise(.05,.3);this.tone(130,.12,"sine",.22)},
+  alarm(){this.tone(660,.18,"square",.05);this.tone(520,.22,"square",.05,.22)},
+  portal(){this.tone(180,.7,"sine",.1,0,900);this.tone(270,.7,"triangle",.04,.05,1300)},
+  poda(){this.tone(900,.45,"sawtooth",.035,0,160);this.noise(.08,.15)},
+  win(){[523,659,784].forEach((f,i)=>this.tone(f,.25,"triangle",.07,i*.12))}};
+function setSoundBtn(){$("#tSnd").setAttribute("aria-pressed",S.sound);$("#tSnd").textContent=S.sound?"Sonido":"Silencio"}
+$("#tSnd").onclick=()=>{S.sound=!S.sound;save();setSoundBtn();if(S.sound)Sound.stamp()};
+
+/* ================= Motor ================= */
+function evalW(ch){const b=ch.board();let s=0;
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=b[r][c];if(!p)continue;let v=PV[p.type];const cent=(3.5-Math.abs(3.5-c))+(3.5-Math.abs(3.5-r));
+    if(p.type==="n"||p.type==="b")v+=cent*6;else if(p.type==="p")v+=(p.color==="w"?6-r:r-1)*8+(c>=2&&c<=5?cent*3:0);else if(p.type==="q")v+=cent*2;else if(p.type==="k")v+=(p.color==="w"?(r===7?15:0):(r===0?15:0));
+    s+=p.color==="w"?v:-v}return s}
+function nm(ch,d,a,b,ply){const ms=ch.moves({verbose:true});if(!ms.length)return ch.in_check()?-(MATE-ply):0;if(ch.in_draw())return 0;
+  if(d===0){const e=evalW(ch);return ch.turn()==="w"?e:-e}
+  ms.sort((x,y)=>(y.captured?PV[y.captured]*10-PV[y.piece]:0)-(x.captured?PV[x.captured]*10-PV[x.piece]:0));
+  let best=-Infinity;for(const m of ms){ch.move({from:m.from,to:m.to,promotion:m.promotion});const v=-nm(ch,d-1,-b,-a,ply+1);ch.undo();if(v>best)best=v;if(v>a)a=v;if(a>=b)break}return best}
+function fallbackSearch(fen,depth,noise){
+  const ch=new Chess(fen),ms=ch.moves({verbose:true});
+  const sc=ms.map(m=>{ch.move({from:m.from,to:m.to,promotion:m.promotion});const v=-nm(ch,depth-1,-Infinity,Infinity,1);ch.undo();return{m,v}}).sort((x,y)=>y.v-x.v);
+  let p=sc[0];if(noise){p=pick(sc.filter(s=>s.v>=sc[0].v-noise))}
+  const top=sc[0].v,stm=fen.split(" ")[1];let mate=null;
+  if(Math.abs(top)>MATE-200)mate=(top>0?1:-1)*(stm==="w"?1:-1)*Math.ceil((MATE-Math.abs(top))/2);
+  const u=x=>x.from+x.to+(x.promotion||"");
+  return{best:u(p.m),cp:stm==="w"?top:-top,mate,pv:[u(sc[0].m)]}}
+const Engine={kind:"init",worker:null,queue:[],cur:null,
+  init(){try{const src="importScripts('https://cdn.jsdelivr.net/npm/stockfish@10.0.2/src/stockfish.asm.js');";
+    this.worker=new Worker(URL.createObjectURL(new Blob([src],{type:"application/javascript"})));
+    this.worker.onmessage=e=>this.line(String(e.data));this.worker.onerror=()=>this.fail();this.worker.postMessage("uci");
+    this.timer=setTimeout(()=>{if(this.kind!=="sf")this.fail()},20000)}catch(e){this.fail()}},
+  fail(){if(this.kind==="fallback")return;try{this.worker&&this.worker.terminate()}catch(e){}this.worker=null;this.kind="fallback";engState();if(this.cur){const j=this.cur;this.cur=null;this.queue.unshift(j)}this.pump()},
+  line(l){if(l==="uciok"){clearTimeout(this.timer);this.kind="sf";engState();this.pump();return}
+    const j=this.cur;if(!j)return;
+    if(l.startsWith("info")&&l.includes(" score ")&&l.includes(" pv ")){const mp=l.match(/ multipv (\d+)/);if(mp&&mp[1]!=="1")return;
+      const sc=l.match(/ score (cp|mate) (-?\d+)/);if(!sc)return;const v=+sc[2],sg=j.stm==="w"?1:-1;
+      if(sc[1]==="cp"){j.res.cp=v*sg;j.res.mate=null}else{j.res.mate=v*sg;j.res.cp=(v>0?1:-1)*sg*(MATE-Math.abs(v)*100)}
+      j.res.pv=l.split(" pv ")[1].trim().split(" ").slice(0,10)}
+    else if(l.startsWith("bestmove")){j.res.best=l.split(" ")[1];this.cur=null;j.resolve(j.res);this.pump()}},
+  analyse(fen,o){o=o||{};return new Promise(resolve=>{const ch=new Chess(fen);
+    if(ch.game_over()){resolve({best:null,cp:ch.in_checkmate()?(ch.turn()==="w"?-MATE:MATE):0,mate:ch.in_checkmate()?0:null,pv:[]});return}
+    const job={fen,o,resolve,stm:fen.split(" ")[1],res:{best:null,cp:0,mate:null,pv:[]}};
+    if(o.prio)this.queue.unshift(job);else this.queue.push(job);this.pump()})},
+  pump(){if(this.cur||!this.queue.length||this.kind==="init")return;const j=this.queue.shift();this.cur=j;
+    if(this.kind==="sf"){this.worker.postMessage("setoption name Skill Level value "+(j.o.skill==null?20:j.o.skill));this.worker.postMessage("position fen "+j.fen);this.worker.postMessage("go movetime "+(j.o.time||300))}
+    else setTimeout(()=>{const r=fallbackSearch(j.fen,j.o.depth||2,j.o.noise||0);this.cur=null;j.resolve(r);this.pump()},15)}};
+function engState(){const s=$("#engSeal");s.classList.toggle("on",Engine.kind==="sf");s.textContent=Engine.kind==="sf"?"Stockfish":Engine.kind==="fallback"?"Respaldo":"Motor…"}
+
+/* ================= Lenguaje y criterio ================= */
+function describe(m){if(!m)return"";let t;
+  if(m.flags.includes("k"))t="Enroque corto: el rey va a "+m.to+" y la torre se pone al lado.";
+  else if(m.flags.includes("q"))t="Enroque largo: el rey va a "+m.to+" y la torre se pone al lado.";
+  else{t=NAME[m.piece]+" de "+m.from+(m.captured?" captura en "+m.to+" (se come "+CAPT[m.captured]+")":" a "+m.to);if(m.promotion)t+=" y corona dama";t+="."}
+  if(m.san.includes("#"))t+=" Jaque mate.";else if(m.san.includes("+"))t+=" Da jaque.";return t}
+function uciMove(fen,uci){if(!uci||uci==="(none)")return null;try{return new Chess(fen).move({from:uci.slice(0,2),to:uci.slice(2,4),promotion:uci[4]||"q"})}catch(e){return null}}
+function fenAfter(fen,m){const c=new Chess(fen);c.move({from:m.from,to:m.to,promotion:m.promotion||"q"});return c.fen()}
+function evalWords(r){if(!r)return"Calculando…";
+  if(r.mate!=null)return r.mate===0?"Jaque mate.":"Mate en "+Math.abs(r.mate)+" para las "+(r.mate>0?"blancas":"negras")+".";
+  const a=Math.abs(r.cp),who=r.cp>0?"las blancas":"las negras";
+  if(a<40)return"Posición pareja.";if(a<120)return"Ventaja leve de "+who+".";if(a<300)return"Ventaja clara de "+who+".";if(a<700)return"Ventaja grande de "+who+" (como una pieza de más).";return"Ventaja decisiva de "+who+"."}
+const clampCp=c=>Math.max(-1500,Math.min(1500,c));
+const VERD={mejor:{t:"Correcta",c:"v-mejor",mk:"★"},buena:{t:"Sirve",c:"v-buena",mk:""},impr:{t:"Imprecisión",c:"v-impr",mk:"?!"},error:{t:"Error",c:"v-error",mk:"?"},grave:{t:"Error grave",c:"v-grave",mk:"??"}};
+function verdict(b,a,m){if(!b||!a)return null;if(b.best&&b.best.slice(0,4)===m.from+m.to)return"mejor";
+  const loss=(m.color==="w"?1:-1)*(clampCp(b.cp)-clampCp(a.cp));
+  if(loss>=300)return"grave";if(loss>=120)return"error";if(loss>=50)return"impr";return"buena"}
+/* Clasifica el porqué de un error: tipo + frase */
+function classify(fenB,m,b,a){
+  const side=m.color==="w"?1:-1;
+  if(a&&a.mate!=null&&a.mate!==0&&Math.sign(a.mate)!==side)return{type:"mate",text:"Le dejaste al rival un mate en "+Math.abs(a.mate)+"."};
+  const fA=fenAfter(fenB,m),rep=a&&a.pv&&a.pv[0]?uciMove(fA,a.pv[0]):null;
+  if(rep&&rep.captured&&PV[rep.captured]>=PV[rep.piece]-10)return{type:"hang",text:"Dejaste "+CAPT[rep.captured]+" en "+rep.to+" sin cuidar: el rival juega "+rep.san+" y se "+(rep.captured==="r"||rep.captured==="q"?"la":"lo")+" come."};
+  if(rep&&rep.captured)return{type:"hang",text:"Después de "+rep.san+" perdés material en el cambio. Contá atacantes y defensores antes de mover."};
+  if(b&&b.mate!=null&&b.mate!==0&&Math.sign(b.mate)===side)return{type:"missed",text:"Tenías mate en "+Math.abs(b.mate)+" y no lo viste."};
+  const bm=b&&b.best?uciMove(fenB,b.best):null;
+  if(bm&&bm.captured)return{type:"missed",text:"Había para comer "+CAPT[bm.captured]+" en "+bm.to+" y lo dejaste pasar."};
+  if(rep&&rep.san.includes("+"))return{type:"check",text:"Le abriste al rival un jaque peligroso con "+rep.san+"."};
+  return{type:"pos",text:"Tu posición empeora: de «"+evalWords(b).replace(/\.$/,"").toLowerCase()+"» a «"+evalWords(a).replace(/\.$/,"").toLowerCase()+"»."}}
+function oneLine(v,fenB,m,b,a){
+  if(v==="mejor")return"Correcta. Era la jugada.";
+  if(v==="buena")return"Sirve. No regalaste nada.";
+  if(v==="impr"){const bm=b&&b.best?uciMove(fenB,b.best):null;return"Anda, pero no alcanza"+(bm?": "+bm.san+" era más fuerte":"")+"."}
+  return classify(fenB,m,b,a).text}
+
+/* ================= Aperturas ================= */
+const OPEN_SEQ=[["e4 e5 Nf3 Nc6 Bc4 Nf6","Dos Caballos"],["e4 e5 Nf3 Nc6 Bc4","Italiana"],["e4 e5 Nf3 Nc6 Bb5","Española"],["e4 e5 Nf3 Nc6 d4","Escocesa"],["e4 e5 Nf3 Nc6 Nc3 Nf6","Cuatro Caballos"],["e4 e5 Nf3 Nf6","Petrov"],["e4 e5 Nf3 d6","Philidor"],["e4 e5 Nc3","Vienesa"],["e4 e5 f4","Gambito de Rey"],["e4 e5 Bc4","Apertura de Alfil"],["e4 c5","Siciliana"],["e4 e6","Francesa"],["e4 c6","Caro-Kann"],["e4 d5","Escandinava"],["e4 d6","Pirc"],["e4 Nf6","Alekhine"],["d4 d5 c4 c6","Eslava"],["d4 d5 c4","Gambito de Dama"],["d4 d5 Bf4","Londres"],["d4 Nf6 Bf4","Londres"],["d4 Nf6 c4 e6 Nc3 Bb4","Nimzoindia"],["d4 Nf6 c4 g6","India de Rey"],["d4 f5","Holandesa"],["c4","Inglesa"]];
+const OPEN_IDEA={"Dos Caballos":"Las negras desarrollan rápido y contraatacan e4; cuidado con f7.","Italiana":"El alfil en c4 apunta a f7, el punto débil. Enrocá rápido y peleá el centro con c3 y d4.","Española":"Presionás el caballo que defiende e5. Plan lento: centro fuerte y enroque.","Escocesa":"d4 temprano abre el centro y libera tus piezas.","Cuatro Caballos":"Desarrollo simétrico y tranquilo: gana el que mejor coloca sus piezas.","Petrov":"Las negras contraatacan e4 en vez de defender e5.","Philidor":"d6 defiende e5 de forma sólida pero pasiva.","Vienesa":"Cc3 prepara f4 para atacar.","Gambito de Rey":"Ofrecés el peón f para abrir la columna f y atacar.","Apertura de Alfil":"Alfil a c4 temprano, apuntando a f7.","Siciliana":"Las negras pelean el centro desde el costado con c5: partidas desequilibradas y tácticas.","Francesa":"Cadena de peones sólida con e6 y d5; el contraataque llega con c5.","Caro-Kann":"c6 prepara d5 sin encerrar al alfil de casillas blancas. Sólida.","Escandinava":"Las negras atacan e4 al toque con d5. Ojo con la dama que sale temprano.","Pirc":"Las negras ceden el centro y lo atacan después con piezas.","Alekhine":"El caballo invita a los peones blancos a avanzar para atacarlos después.","Eslava":"c6 sostiene d5 sin encerrar el alfil.","Gambito de Dama":"Ofrecés el peón de c4 para ganar el centro.","Londres":"Sistema con d4, Af4 y e3: fácil de armar, plan claro.","Nimzoindia":"El alfil clava el caballo de c3 para frenar e4.","India de Rey":"Las negras ceden el centro y lo atacan con e5 o c5, con el rey bien guardado.","Holandesa":"f5 controla e4 y prepara ataque en el flanco de rey.","Inglesa":"c4 controla d5 desde el costado. Juego posicional."};
+const OPEN_EN=[["Two Knights","Dos Caballos"],["Italian","Italiana"],["Giuoco","Italiana"],["Ruy Lopez","Española"],["Scotch","Escocesa"],["Four Knights","Cuatro Caballos"],["Russian","Petrov"],["Petrov","Petrov"],["Philidor","Philidor"],["Vienna","Vienesa"],["King's Gambit","Gambito de Rey"],["Bishop's Opening","Apertura de Alfil"],["Sicilian","Siciliana"],["French","Francesa"],["Caro-Kann","Caro-Kann"],["Scandinavian","Escandinava"],["Pirc","Pirc"],["Alekhine","Alekhine"],["Slav","Eslava"],["Queen's Gambit","Gambito de Dama"],["London","Londres"],["Nimzo-Indian","Nimzoindia"],["King's Indian","India de Rey"],["Dutch","Holandesa"],["English","Inglesa"]];
+function openingFromMoves(sans){const s=sans.join(" ");let best=null;for(const [seq,n] of OPEN_SEQ)if((s+" ").startsWith(seq+" ")&&(!best||seq.length>best[0].length))best=[seq,n];return best?best[1]:null}
+function openingES(enName,sans){if(enName){for(const [k,v] of OPEN_EN)if(enName.includes(k))return v}return openingFromMoves(sans||[])}
+function openingIdea(es){return OPEN_IDEA[es]||"Sin teoría famosa acá: ocupá el centro, sacá caballos y alfiles y enrocá."}
+
+/* ================= Piezas en peligro ================= */
+function capturers(fen,sq,by){const p=fen.split(" ");p[1]=by;p[3]="-";const c=new Chess();if(!c.load(p.join(" ")))return[];return c.moves({verbose:true}).filter(m=>m.to===sq&&m.captured).map(m=>m.piece)}
+function defenders(fen,sq,by){const p=fen.split(" ");p[1]=by;p[3]="-";const c=new Chess();if(!c.load(p.join(" ")))return[];c.remove(sq);c.put({type:"n",color:by==="w"?"b":"w"},sq);return c.moves({verbose:true}).filter(m=>m.to===sq&&m.captured).map(m=>m.piece)}
+function hanging(ch,color){const fen=ch.fen(),opp=color==="w"?"b":"w",out=[];
+  for(let i=0;i<64;i++){const sq=FILES[i%8]+(Math.floor(i/8)+1),p=ch.get(sq);if(!p||p.color!==color||p.type==="k")continue;
+    const at=capturers(fen,sq,opp);if(!at.length)continue;const cheapest=Math.min(...at.map(t=>PV[t]||1000));
+    if(!defenders(fen,sq,color).length||cheapest<PV[p.type])out.push({sq,type:p.type})}
+  return out.sort((x,y)=>PV[y.type]-PV[x.type])}
+
+/* ================= Tablero ================= */
+function sqXY(sq,flip){const f=FILES.indexOf(sq[0]),r=+sq[1]-1;return flip?{x:7-f,y:r}:{x:f,y:7-r}}
+function kingSq(ch,color){for(let i=0;i<64;i++){const sq=FILES[i%8]+(Math.floor(i/8)+1),p=ch.get(sq);if(p&&p.type==="k"&&p.color===color)return sq}return null}
+function arrowSVG(list,flip){let h='<svg class="arrow" viewBox="0 0 8 8" aria-hidden="true">';
+  for(const a of list){if(!a||!a.uci)continue;const A=sqXY(a.uci.slice(0,2),flip),B=sqXY(a.uci.slice(2,4),flip);
+    const x1=A.x+.5,y1=A.y+.5,x2=B.x+.5,y2=B.y+.5,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,ex=x2-ux*.42,ey=y2-uy*.42,hw=.26,c=a.color||"#FF6A00";
+    h+='<line x1="'+x1+'" y1="'+y1+'" x2="'+ex+'" y2="'+ey+'" stroke="'+c+'" stroke-width=".17" stroke-linecap="round" opacity=".92"/><polygon points="'+(x2-ux*.08)+","+(y2-uy*.08)+" "+(ex-uy*hw)+","+(ey+ux*hw)+" "+(ex+uy*hw)+","+(ey-ux*hw)+'" fill="'+c+'" opacity=".92"/>'}
+  return h+"</svg>"}
+function renderBoard(el,ch,o){
+  const flip=!!o.flip,dots=new Map((o.dots||[]).map(m=>[m.to,m])),risk=new Set(o.risk||[]),chk=ch.in_check()?kingSq(ch,ch.turn()):null;let h="";
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+    const f=flip?7-x:x,r=flip?y:7-y,sq=FILES[f]+(r+1),p=ch.get(sq),cls=["sq",(f+r)%2===1?"l":"d"];
+    if(o.last&&(o.last.from===sq||o.last.to===sq))cls.push("last");if(o.sel===sq)cls.push("sel");if(o.hl===sq)cls.push("hl");if(chk===sq)cls.push("chk");
+    const d=dots.get(sq);if(d)cls.push(d.captured?"cap":"dot");
+    let inner="";if(x===0&&!o.mini)inner+='<i class="rk">'+(r+1)+"</i>";if(y===7&&!o.mini)inner+='<i class="fl">'+FILES[f]+"</i>";
+    if(p){inner+='<b class="sh"></b>';if(risk.has(sq))inner+='<b class="risk"></b>';inner+='<span class="pc" data-sq="'+sq+'">'+pieceSVG(p)+"</span>"}
+    h+='<div class="'+cls.join(" ")+'" data-sq="'+sq+'">'+inner+"</div>"}
+  if(o.arrows&&o.arrows.length)h+=arrowSVG(o.arrows,flip);
+  el.innerHTML=h;
+  if(o.anim&&!reduced){const pc=el.querySelector('.pc[data-sq="'+o.anim.to+'"]');
+    if(pc){const s=el.clientWidth/8,A=sqXY(o.anim.from,flip),B=sqXY(o.anim.to,flip);
+      pc.style.setProperty("--tx",(A.x-B.x)*s+"px");pc.style.setProperty("--ty",(A.y-B.y)*s+"px");void pc.offsetWidth;pc.classList.add("moving");
+      pc.style.setProperty("--tx","0px");pc.style.setProperty("--ty","0px");setTimeout(()=>pc.classList.remove("moving"),420)}}}
+function onBoardClick(el,fn){el.addEventListener("click",e=>{const s=e.target.closest("[data-sq]");if(s)fn(s.dataset.sq)})}
+function fx(id,kind){if(reduced)return;const el=$(id),d=document.createElement("div");if(kind==="portal")d.className="portal";else{d.className="poda";d.innerHTML="<span>Variante podada</span>"}el.appendChild(d);setTimeout(()=>d.remove(),1200)}
+function gameOverText(ch){if(ch.in_checkmate())return"Jaque mate. Ganan las "+(ch.turn()==="w"?"negras":"blancas")+".";if(ch.in_stalemate())return"Ahogado: tablas.";if(ch.insufficient_material())return"Tablas por material insuficiente.";if(ch.in_threefold_repetition())return"Tablas por triple repetición.";return"Tablas."}
+
+/* Inclinación: se arrastra la barra hacia arriba o abajo */
+function applyTilt(){const t=Math.max(0,Math.min(62,S.tilt));
+  $$(".stage:not(.mini)").forEach(st=>{st.style.setProperty("--k",Math.min(1.25,t/34));const b=st.querySelector(".board");if(b)b.style.setProperty("--tilt",t+"deg")});
+  $$("[data-grip]").forEach(g=>{g.querySelector("[data-deg]").textContent=t===0?"Plano":Math.round(t)+"°";g.setAttribute("aria-valuenow",Math.round(t))})}
+$$("[data-grip]").forEach(g=>{let y0=null,t0=0;
+  g.addEventListener("pointerdown",e=>{y0=e.clientY;t0=S.tilt;g.setPointerCapture(e.pointerId)});
+  g.addEventListener("pointermove",e=>{if(y0==null)return;S.tilt=Math.max(0,Math.min(62,t0+(y0-e.clientY)*.35));applyTilt()});
+  const end=()=>{if(y0!=null){y0=null;save()}};g.addEventListener("pointerup",end);g.addEventListener("pointercancel",end);
+  g.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowRight"){S.tilt=Math.min(62,S.tilt+4)}else if(e.key==="ArrowDown"||e.key==="ArrowLeft"){S.tilt=Math.max(0,S.tilt-4)}else return;e.preventDefault();applyTilt();save()});
+  g.addEventListener("dblclick",()=>{S.tilt=S.tilt>0?0:34;applyTilt();save()})});
+
+/* Ventana al futuro */
+function openFuture(panelId,fen,pv,flip,title){
+  const el=$(panelId),steps=[];const c=new Chess(fen);
+  for(const u of (pv||[]).slice(0,8)){const m=uciMove(c.fen(),u);if(!m)break;c.move({from:m.from,to:m.to,promotion:m.promotion||"q"});steps.push({m,fen:c.fen()})}
+  el.hidden=false;
+  if(!steps.length){el.innerHTML='<p class="label"><span>Ventana al futuro</span></p><p style="margin:0">Todavía no tengo la línea calculada. Probá en un segundo.</p><div class="row" style="margin-top:8px"><button class="btn" data-close>Cerrar</button></div>';el.querySelector("[data-close]").onclick=()=>{el.hidden=true};return}
+  let k=0;
+  function draw(){const cur=new Chess(k?steps[k-1].fen:fen),m=k?steps[k-1].m:null;
+    el.innerHTML='<p class="label"><span>Ventana al futuro · '+esc(title)+'</span><b>'+k+" / "+steps.length+'</b></p><div class="stage mini" style="max-width:260px;margin:0 auto"><div class="board"></div></div>'
+      +'<div class="line">'+steps.map((s,i)=>'<span class="'+(i+1===k?"on":i+1<k?"done":"")+'">'+s.m.san+"</span>").join("")+"</div>"
+      +'<p style="margin:8px 0 0;font-size:14px">'+(m?(m.color==="w"?"Blancas: ":"Negras: ")+esc(describe(m)):"Así está ahora. Tocá ▶ para ver cómo seguiría.")+"</p>"
+      +'<div class="row" style="margin-top:10px"><button class="btn icon" data-p aria-label="Atrás">◀</button><button class="btn icon" data-n aria-label="Adelante">▶</button><button class="btn" data-close>Volver al presente</button></div>';
+    renderBoard(el.querySelector(".board"),cur,{flip,last:m,mini:true,anim:m});
+    el.querySelector("[data-p]").disabled=k===0;el.querySelector("[data-n]").disabled=k===steps.length;
+    el.querySelector("[data-p]").onclick=()=>{k--;draw()};el.querySelector("[data-n]").onclick=()=>{k++;Sound.stamp();draw()};el.querySelector("[data-close]").onclick=()=>{el.hidden=true}}
+  draw();Sound.portal();el.scrollIntoView({block:"nearest",behavior:reduced?"auto":"smooth"})}
+
+function toast(title,text){const t=document.createElement("div");t.className="toast";t.innerHTML="<b>"+esc(title)+"</b>"+esc(text);document.body.appendChild(t);setTimeout(()=>t.remove(),4200)}
+
+/* ================= Partidas: armado y análisis ================= */
+function buildRecord(o){/* o:{id,source,sans,clocks,clock,color,white,black,wr,br,result,opening,speed,date} */
+  const c=new Chess(),fens=[c.fen()],moves=[];
+  for(const s of o.sans){const m=c.move(s,{sloppy:true});if(!m)return null;moves.push({san:m.san,from:m.from,to:m.to,piece:m.piece,captured:m.captured||null,color:m.color,flags:m.flags,promotion:m.promotion||null});fens.push(c.fen())}
+  if(!moves.length)return null;
+  let times=null;
+  if(o.clocks&&o.clocks.length&&o.clock){times=[];const init=o.clock.initial,inc=o.clock.increment||0;
+    for(let i=0;i<moves.length;i++){const rem=o.clocks[i]!=null?o.clocks[i]/100:null;const prev=i<2?init:(o.clocks[i-2]!=null?o.clocks[i-2]/100:null);
+      times.push(rem==null||prev==null?null:Math.max(0,Math.round((prev-rem+(i<2?0:inc))*10)/10))}}
+  if(o.times)times=o.times;
+  return{id:o.id,source:o.source,date:o.date||Date.now(),color:o.color||null,white:o.white||"Blancas",black:o.black||"Negras",wr:o.wr||null,br:o.br||null,
+    result:o.result||"*",opening:openingES(o.opening,moves.map(m=>m.san)),speed:o.speed||null,fens,moves,times,ev:null,done:false}}
+function myResult(g){if(!g.color||g.result==="*")return"";if(g.result==="1/2-1/2")return"d";return(g.result==="1-0")===(g.color==="w")?"w":"l"}
+function compactEval(r){return r?{cp:Math.round(r.cp),mate:r.mate,best:r.best,pv:(r.pv||[]).slice(0,8)}:null}
+function deriveGame(g){/* veredictos, tipos, tiempos */
+  g.verd=[];g.types=[];
+  for(let i=1;i<g.fens.length;i++){const m=g.moves[i-1],b=g.ev[i-1],a=g.ev[i],v=verdict(b,a,m);g.verd[i]=v;
+    g.types[i]=(v==="error"||v==="grave")?classify(g.fens[i-1],Object.assign({},m),b,a).type:null}
+  const mine=[];for(let i=1;i<g.fens.length;i++){const m=g.moves[i-1];if(!g.color||m.color===g.color)mine.push(i)}
+  const tms=g.times?mine.map(i=>g.times[i-1]).filter(t=>t!=null):[];
+  const med=tms.length?tms.slice().sort((x,y)=>x-y)[Math.floor(tms.length/2)]:null;
+  g.fastT=med!=null?Math.max(3,Math.min(med*.45,12)):null;
+  const st={moves:mine.length,impr:0,error:0,grave:0,hang:0,missed:0,fastErr:0,errs:0,fast:0,phase:{a:0,m:0,f:0}};
+  for(const i of mine){const v=g.verd[i];if(v==="impr")st.impr++;if(v==="error")st.error++;if(v==="grave")st.grave++;
+    const t=g.times?g.times[i-1]:null,fast=t!=null&&g.fastT!=null&&t<g.fastT;if(fast)st.fast++;
+    if(v==="error"||v==="grave"){st.errs++;if(g.types[i]==="hang"||g.types[i]==="mate")st.hang++;if(g.types[i]==="missed")st.missed++;if(fast)st.fastErr++;st.phase[phaseOf(g.fens[i-1],i)]++}}
+  g.stats=st;g.done=true}
+function phaseOf(fen,ply){if(ply<=20)return"a";const b=new Chess(fen).board();let mat=0;for(const r of b)for(const p of r)if(p&&"nbrq".includes(p.type))mat+=({n:3,b:3,r:5,q:9})[p.type];return mat<=14?"f":"m"}
+
+/* Cola de análisis en segundo plano */
+const BG={running:false,cur:null};
+async function bgRun(){
+  if(BG.running)return;BG.running=true;
+  try{for(;;){
+    const g=S.games.find(x=>!x.done);if(!g)break;BG.cur=g.id;
+    if(!g.ev)g.ev=new Array(g.fens.length).fill(null);
+    for(let i=0;i<g.fens.length;i++){if(g.ev[i])continue;
+      const r=await Engine.analyse(g.fens[i],{skill:20,time:180,depth:2});if(!gameById(g.id))break;g.ev[i]=compactEval(r);
+      if(i%6===0)bgUI();if(R.cur===g.id)renderReview()}
+    if(!gameById(g.id))continue;
+    deriveGame(g);buildExercises(g);save();checkAch();bgUI();if(R.cur===g.id)renderReview();renderList();if(view==="inicio")renderHome()}
+  }finally{BG.running=false;BG.cur=null;bgUI();if(view==="progreso")renderProgress()}}
+function bgUI(){const pend=S.games.filter(g=>!g.done),bar=$("#bgBar");
+  if(!pend.length){bar.hidden=true;return}
+  const g=gameById(BG.cur)||pend[0],k=g&&g.ev?g.ev.filter(Boolean).length:0,n=g?g.fens.length:1;
+  bar.hidden=false;bar.querySelector("span").style.width=(k/n*100)+"%";
+  $("#syncTxt").innerHTML="El analista revisa tus partidas: quedan <b>"+pend.length+"</b>. Podés jugar mientras tanto."}
+
+/* ================= Lichess ================= */
+async function syncLichess(){
+  const u=($("#iUser").value||S.user||"").trim();if(!u){$("#syncTxt").innerHTML='<span class="err">Poné tu usuario de Lichess.</span>';return}
+  S.user=u;save();$("#syncTxt").textContent="Buscando tus partidas en Lichess…";$("#bSync").disabled=true;
+  try{
+    const ur=await fetch("https://lichess.org/api/user/"+encodeURIComponent(u));
+    if(ur.status===404)throw new Error("No encontré el usuario «"+u+"» en Lichess. Revisá cómo está escrito.");
+    if(ur.ok){const ud=await ur.json();S.ratings={};for(const k of ["rapid","classical","blitz","bullet"])if(ud.perfs&&ud.perfs[k]&&ud.perfs[k].games)S.ratings[k]=ud.perfs[k].rating;S.rating=S.ratings.rapid||S.ratings.classical||S.ratings.blitz||null;S.user=ud.username||u}
+    const r=await fetch("https://lichess.org/api/games/user/"+encodeURIComponent(S.user)+"?max=20&clocks=true&opening=true&perfType=rapid,classical,blitz",{headers:{Accept:"application/x-ndjson"}});
+    if(r.status===429)throw new Error("Lichess pidió esperar un minuto antes de volver a consultar.");
+    if(!r.ok)throw new Error("Lichess respondió con un error ("+r.status+"). Probá de nuevo en un rato.");
+    const lines=(await r.text()).split("\n").filter(Boolean);let added=0;
+    for(const ln of lines){let gj;try{gj=JSON.parse(ln)}catch(e){continue}
+      if(gj.variant!=="standard"||!gj.moves||gameById("li-"+gj.id))continue;
+      const wn=(gj.players.white.user||{}).name||"Anónimo",bn=(gj.players.black.user||{}).name||"Anónimo";
+      const color=wn.toLowerCase()===S.user.toLowerCase()?"w":bn.toLowerCase()===S.user.toLowerCase()?"b":null;
+      const rec=buildRecord({id:"li-"+gj.id,source:"lichess",sans:gj.moves.split(" "),clocks:gj.clocks,clock:gj.clock,color,white:wn,black:bn,wr:gj.players.white.rating,br:gj.players.black.rating,
+        result:gj.winner==="white"?"1-0":gj.winner==="black"?"0-1":(gj.status==="draw"||gj.status==="stalemate"?"1/2-1/2":"1/2-1/2"),opening:gj.opening&&gj.opening.name,speed:gj.speed,date:gj.createdAt});
+      if(rec){S.games.push(rec);added++}}
+    S.games.sort((a,b)=>b.date-a.date);
+    const keepLi=S.games.filter(g=>g.source==="lichess").slice(0,40).map(g=>g.id);S.games=S.games.filter(g=>g.source!=="lichess"||keepLi.includes(g.id));
+    S.lastSync=Date.now();save();
+    $("#syncTxt").innerHTML=added?"Traje <b>"+added+"</b> partida"+(added>1?"s":"")+" nueva"+(added>1?"s":"")+". El analista las revisa de a una.":"No hay partidas nuevas desde la última vez.";
+    renderHome();renderList();bgRun()}
+  catch(e){const blocked=e instanceof TypeError;
+    $("#syncTxt").innerHTML='<span class="err">'+esc(blocked?"No me pude conectar con Lichess desde acá. En la versión instalada funciona; mientras tanto, pegá el PGN en Revisar.":e.message)+"</span>"}
+  finally{$("#bSync").disabled=false}}
+$("#bSync").onclick=()=>{Sound.c();syncLichess()};
+$("#iUser").onchange=()=>{S.user=$("#iUser").value.trim();save()};
+
+/* ================= Ejercicios ================= */
+function buildExercises(g){
+  for(let i=1;i<g.fens.length;i++){const m=g.moves[i-1],v=g.verd[i];if(!(v==="error"||v==="grave"))continue;if(g.color&&m.color!==g.color)continue;
+    const b=g.ev[i-1];if(!b||!b.best)continue;const id=g.id+"-"+i;if(S.ex[id])continue;
+    S.ex[id]={id,gid:g.id,ply:i,fen:g.fens[i-1],best:b.best,played:m.san,why:classify(g.fens[i-1],Object.assign({},m),b,g.ev[i]).text,ok:0,tries:0,last:0,date:g.date}}}
+function exQueue(){return Object.values(S.ex).filter(e=>e.ok<2).sort((a,b)=>a.last-b.last||b.date-a.date)}
+
+/* ================= JUGAR ================= */
+const LV=[null,{skill:0,time:80,rand:.45,depth:1,noise:300},{skill:0,time:100,rand:.3,depth:1,noise:200},{skill:0,time:150,rand:.15,depth:1,noise:120},{skill:2,time:200,rand:.05,depth:2,noise:80},{skill:4,time:250,rand:0,depth:2,noise:50},{skill:6,time:300,rand:0,depth:2,noise:30},{skill:8,time:400,rand:0,depth:2,noise:15},{skill:11,time:500,rand:0,depth:3,noise:10},{skill:15,time:700,rand:0,depth:3,noise:0},{skill:20,time:1000,rand:0,depth:3,noise:0}];
+const P={mode:"game",ch:new Chess(),color:"w",flip:false,sel:null,legal:[],busy:false,gen:0,pre:null,arrows:[],hl:null,hintStep:0,last:null,anim:null,stats:[],tips:new Set(),nexo:null,t0:0,times:[],opening:null,ex:null};
+const OPEN_TXT=["Anotado.","Registrado.","Sigo.","Expediente actualizado.","A ver qué hacés con esto."];
+function say(h,thinking){$("#pSay").innerHTML=h;$("#pLegal").innerHTML="";$("#pAgent").classList.toggle("thinking",!!thinking)}
+function renderLevel(){$("#pLvl").innerHTML=Array.from({length:10},(_,i)=>'<span class="'+(i<S.level?"on":"")+'"></span>').join("");$("#pLvlTxt").textContent=S.level+" / 10"}
+function myRisk(){return(P.mode==="game"&&!P.ch.game_over()&&P.ch.turn()===P.color&&S.guard&&!P.busy)?hanging(P.ch,P.color):[]}
+function savePractice(){S.practice={pgn:P.ch.pgn(),color:P.color,flip:P.flip,times:P.times};save()}
+function renderP(){
+  const risk=myRisk();
+  renderBoard($("#pBoard"),P.ch,{flip:P.flip,last:P.last,sel:P.sel,dots:P.legal,arrows:P.arrows,hl:P.hl,risk:risk.map(r=>r.sq),anim:P.anim});P.anim=null;
+  if(P.mode==="game"){
+    const mv=P.ch.history();let h="";for(let i=0;i<mv.length;i+=2)h+='<span class="num">'+(i/2+1)+'.</span><span class="mv">'+mv[i]+'</span><span class="mv">'+(mv[i+1]||"")+"</span>";
+    $("#pMoves").innerHTML=h||'<span></span><span style="grid-column:span 2;color:var(--mute);font-size:14px">Todavía no hay jugadas.</span>';$("#pMoves").scrollTop=1e6;
+    $("#pCount").textContent=mv.length?Math.ceil(mv.length/2)+" turnos":"";
+    const mine=P.ch.turn()===P.color;$("#pTurn").textContent=P.ch.game_over()?"fin":(mine?"te toca":"le toca");
+    const idle=!P.busy&&!P.ch.game_over()&&mine&&!P.nexo;$("#pHint").disabled=!idle;$("#pFutureBtn").disabled=!idle;$("#pUndo").disabled=P.busy||!mv.length;
+    renderLevel();savePractice()}
+  return risk}
+function riskText(r){if(!r.length)return"";return' <span class="bad">Ojo: '+TU[r[0].type]+" en "+r[0].sq+" está en peligro"+(r.length>1?" (y "+(r.length-1)+" más)":"")+".</span>"}
+function prepTurn(prefix){
+  const fen=P.ch.fen();P.pre={fen,p:Engine.analyse(fen,{skill:20,time:500,prio:true,depth:2})};P.hintStep=0;P.arrows=[];P.hl=null;P.busy=false;
+  const r=renderP();P.t0=performance.now();
+  say((prefix?prefix+" ":"")+(P.ch.in_check()?'<span class="bad">Estás en jaque.</span> Sacá al rey del jaque. ':"Te toca.")+riskText(r))}
+function adapt(v){P.stats.push(v);if(P.stats.length>6)P.stats.shift();
+  const bad=P.stats.filter(x=>x==="error"||x==="grave").length,good=P.stats.filter(x=>x==="mejor"||x==="buena").length;
+  if(bad>=3&&S.level>1){S.level--;P.stats=[];save();return"Bajo a nivel "+S.level+". Primero dejá de regalar piezas; después subimos."}
+  if(P.stats.length>=6&&bad===0&&good>=4&&S.level<10){S.level++;P.stats=[];save();checkAch();return"Subo a nivel "+S.level+". Bien: ahora te va a costar más."}return""}
+function tipFor(m){const n=Math.ceil(P.ch.history().length/2),hist=P.ch.history({verbose:true}).filter(x=>x.color===P.color),T=(k,t)=>{if(P.tips.has(k))return"";P.tips.add(k);return t};
+  const op=openingFromMoves(P.ch.history());if(op&&op!==P.opening&&P.ch.history().length>=3){P.opening=op;return T("op-"+op,"Esto es la "+op+". "+openingIdea(op))}
+  if(m.flags.includes("k")||m.flags.includes("q"))return T("castled","Enroque hecho. Rey a salvo y torre en juego.");
+  if(m.piece==="q"&&n<=5)return T("queen","Dama afuera en la jugada "+n+": el rival la va a perseguir ganando tiempo. Primero caballos y alfiles.");
+  if(m.piece==="n"&&(m.to[0]==="a"||m.to[0]==="h"))return T("rim","Caballo en el borde: controla la mitad de casillas que en el centro.");
+  if(n<=10&&hist.length>=2){const pr=hist[hist.length-2];if(pr&&pr.to===m.from&&m.piece!=="p"&&m.piece!=="k"&&!m.captured)return T("twice","Moviste dos veces la misma pieza en la apertura. Sacá una nueva.")}
+  if(n>=9&&kingSq(P.ch,P.color)===(P.color==="w"?"e1":"e8")&&!P.tips.has("castled"))return T("castle","Jugada "+n+" y tu rey sigue en el centro. Enrocá.");
+  return""}
+function feedCard(m,v,line,more,tip,lvl,secs){
+  let h='<p class="label"><span>Tu jugada</span>'+(secs!=null?"<b>"+fmtSec(secs)+"</b>":"")+"</p><h2>"+m.san+(v?' <span class="chip '+VERD[v].c+'">'+VERD[v].t+"</span>":"")+"</h2><p>"+esc(line)+"</p>";
+  if(tip)h+='<div class="tip"><b>Principio</b>'+esc(tip)+"</div>";if(more)h+='<details class="more"><summary>Ver más</summary>'+more+"</details>";if(lvl)h+='<p class="help">'+esc(lvl)+"</p>";
+  $("#pFeed").innerHTML=h}
+const fmtSec=s=>s==null?"—":s<60?(Math.round(s*10)/10).toString().replace(".",",")+" s":Math.floor(s/60)+" min "+Math.round(s%60)+" s";
+async function userMove(mv){
+  const g=P.gen,fenB=P.ch.fen(),secs=(performance.now()-P.t0)/1000;
+  const before=P.pre&&P.pre.fen===fenB?P.pre.p:Engine.analyse(fenB,{skill:20,time:500,prio:true,depth:2});
+  const m=P.ch.move({from:mv.from,to:mv.to,promotion:"q"});
+  P.last=m;P.anim=m;P.sel=null;P.legal=[];P.arrows=[];P.hl=null;P.busy=true;$("#pFuture").hidden=true;renderP();Sound.stamp();say("Reviso tu jugada…",true);
+  const [b,a]=await Promise.all([before,Engine.analyse(P.ch.fen(),{skill:20,time:450,prio:true,depth:2})]);if(g!==P.gen)return;
+  const v=verdict(b,a,m);
+  if(S.guard&&(v==="error"||v==="grave")&&!P.ch.game_over()){showNexo(m,v,b,a,fenB,secs);return}
+  commit(m,v,b,a,fenB,secs)}
+function showNexo(m,v,b,a,fenB,secs){
+  P.nexo={m,v,b,a,fenB,secs};Sound.alarm();$("#pStage").classList.add("nexo");const box=$("#pNexo");box.hidden=false;
+  box.innerHTML='<div class="t">Alerta de evento nexo</div><p><b>'+m.san+":</b> "+esc(classify(fenB,m,b,a).text)+'</p><div class="row"><button class="btn main" id="nxBack">Pensarlo de nuevo</button><button class="btn" id="nxGo">Jugar igual</button></div>';
+  say('<span class="bad">Pará.</span> Esa jugada desvía la línea. Leé el aviso.');renderP();
+  $("#nxBack").onclick=()=>{hideNexo();P.ch.undo();const h=P.ch.history({verbose:true});P.last=h[h.length-1]||null;fx("#pFx","poda");Sound.poda();prepTurn("Línea podada. Mirá qué puede hacer el rival después de tu jugada.")};
+  $("#nxGo").onclick=()=>{const n=P.nexo;hideNexo();commit(n.m,n.v,n.b,n.a,n.fenB,n.secs)}}
+function hideNexo(){P.nexo=null;$("#pNexo").hidden=true;$("#pStage").classList.remove("nexo")}
+function commit(m,v,b,a,fenB,secs){
+  P.times.push(Math.round(secs*10)/10);
+  const bm=b&&b.best?uciMove(fenB,b.best):null;
+  let more="<p>"+esc(describe(m))+"</p><p>"+esc(evalWords(a))+"</p>";if(bm&&v!=="mejor")more+="<p>Lo mejor era <b>"+bm.san+"</b>: "+esc(describe(bm))+"</p>";
+  feedCard(m,v,oneLine(v,fenB,m,b,a),more,tipFor(m),v?adapt(v):"",secs);
+  if(endCheck())return;botTurn()}
+async function botTurn(){
+  const g=P.gen;P.busy=true;P.sel=null;P.legal=[];renderP();say("Estudio el tablero…",true);
+  const L=LV[S.level],t0=Date.now(),fen=P.ch.fen();
+  const r=await Engine.analyse(fen,{skill:L.skill,time:L.time,prio:true,depth:L.depth,noise:L.noise});if(g!==P.gen)return;
+  let uci=r&&r.best;if(L.rand&&Math.random()<L.rand){const mm=pick(P.ch.moves({verbose:true}));uci=mm.from+mm.to+(mm.promotion||"")}
+  await sleep(reduced?300:Math.max(0,2400-(Date.now()-t0)));if(g!==P.gen||!uci)return;
+  const m=P.ch.move({from:uci.slice(0,2),to:uci.slice(2,4),promotion:uci[4]||"q"});P.last=m;P.anim=m;Sound.stamp();
+  let t=pick(OPEN_TXT)+" ";
+  if(m.flags.includes("k")||m.flags.includes("q"))t+="Enroco.";else if(m.captured)t+="Me como "+TU[m.captured]+" en "+m.to+" con mi "+NAMEL[m.piece]+".";else t+="Mi "+NAMEL[m.piece]+" de "+m.from+" a <em>"+m.to+"</em>.";
+  if(m.san.includes("#"))t+=" Jaque mate.";else if(m.san.includes("+"))t+=" Jaque.";
+  if(endCheck())return;prepTurn(t)}
+function endCheck(){
+  if(!P.ch.game_over())return false;P.busy=false;fx("#pFx","portal");
+  const won=P.ch.in_checkmate()&&P.ch.turn()!==P.color,lost=P.ch.in_checkmate()&&P.ch.turn()===P.color;
+  let lv="";if(won){Sound.win();if(S.level<10){S.level++;lv=" Subo a nivel "+S.level+"."}S.wonLevel=Math.max(S.wonLevel||0,S.level-1)}else Sound.portal();
+  if(lost&&S.level>1){S.level--;lv=" Bajo a nivel "+S.level+"."}
+  /* archivo la partida */
+  const id="pr-"+Date.now(),sans=P.ch.history();
+  const rec=buildRecord({id,source:"practica",sans,color:P.color,white:P.color==="w"?"Vos":"Analista Ferreyra",black:P.color==="b"?"Vos":"Analista Ferreyra",result:won?(P.color==="w"?"1-0":"0-1"):lost?(P.color==="w"?"0-1":"1-0"):"1/2-1/2",date:Date.now()});
+  if(rec){rec.times=sans.map((_,i)=>null);let k=0;rec.moves.forEach((m,i)=>{if(m.color===P.color)rec.times[i]=P.times[k++]??null});S.games.unshift(rec)}
+  S.practice=null;markDay();save();renderP();checkAch();bgRun();
+  const avg=P.times.length?P.times.reduce((x,y)=>x+y,0)/P.times.length:null;
+  say("<em>"+gameOverText(P.ch)+"</em>"+(won?" Ganaste. Cerrás el expediente a tu favor.":lost?" Gané yo. Ahora revisamos dónde se torció.":"")+lv);
+  $("#pFeed").innerHTML='<p class="label"><span>Fin de la partida</span></p><h2>'+gameOverText(P.ch)+"</h2>"+(avg!=null?"<p>Pensaste en promedio <b>"+fmtSec(avg)+"</b> por jugada. El informe de tiempos completo está en Revisar.</p>":"")+'<div class="row" style="margin-top:12px"><button class="btn main" id="pToA">Revisar esta partida</button><button class="btn" id="pAgain">Jugar otra</button></div>';
+  $("#pToA").onclick=()=>{if(rec){go("revisar");openGame(rec.id)}};$("#pAgain").onclick=newGame;return true}
+onBoardClick($("#pBoard"),sq=>{Sound.c();if(P.mode==="ex"){exClick(sq);return}
+  if(P.busy||P.nexo||P.ch.game_over())return;if(P.ch.turn()!==P.color){say("Esperá: estoy pensando.");return}
+  if(P.sel){const m=P.legal.find(x=>x.to===sq);if(m){userMove(m);return}}
+  const p=P.ch.get(sq);
+  if(!p||P.sel===sq){P.sel=null;P.legal=[];renderP();say("Tocá una de tus piezas.");return}
+  if(p.color!==P.color){P.sel=null;P.legal=[];renderP();say("Esa es mía. Tocá una tuya.");return}
+  P.sel=sq;P.legal=P.ch.moves({square:sq,verbose:true});P.arrows=[];renderP();
+  const n=P.legal.length,caps=P.legal.filter(m=>m.captured).length;
+  say(n?"Tu "+NAMEL[p.type]+" en "+sq+": "+n+" casilla"+(n>1?"s":"")+(caps?", en "+caps+" se come algo":"")+". Tocá un punto naranja.":"Tu "+NAMEL[p.type]+" en "+sq+" no se puede mover.");
+  $("#pLegal").innerHTML=P.legal.map(m=>"<span>"+m.san+"</span>").join("")});
+function newGame(){
+  P.gen++;hideNexo();$("#pFuture").hidden=true;const c=$("#pColor").value;P.color=c==="r"?(Math.random()<.5?"w":"b"):c;
+  Object.assign(P,{ch:new Chess(),flip:P.color==="b",sel:null,legal:[],arrows:[],hl:null,last:null,busy:false,stats:[],tips:new Set(),times:[],opening:null});
+  fx("#pFx","portal");Sound.portal();
+  $("#pFeed").innerHTML='<p class="label"><span>Expediente abierto</span><b>Nivel '+S.level+'</b></p><h2>Jugás con '+(P.color==="w"?"blancas":"negras")+'</h2><p>Una frase por jugada. Si vas a cometer un error, te freno antes.</p>';
+  renderP();if(P.color==="b")botTurn();else prepTurn("Arrancamos.")}
+$("#pNew").onclick=newGame;$("#pFlip").onclick=()=>{P.flip=!P.flip;renderP()};
+$("#pGuard").onchange=()=>{S.guard=$("#pGuard").checked;save();renderP()};
+$("#pHint").onclick=async()=>{if(P.busy||P.ch.turn()!==P.color)return;const g=P.gen,fen=P.ch.fen();
+  if(!P.pre||P.pre.fen!==fen)P.pre={fen,p:Engine.analyse(fen,{skill:20,time:500,prio:true,depth:2})};
+  say("Busco…",true);const r=await P.pre.p;if(g!==P.gen||P.ch.fen()!==fen||!r||!r.best)return;const m=uciMove(fen,r.best);
+  if(P.hintStep===0){P.hintStep=1;P.hl=m.from;P.arrows=[];renderP();say("Pista 1: mirá tu "+NAMEL[m.piece]+" en <em>"+m.from+"</em>. Pensalo vos. Si no sale, tocá Pista otra vez.")}
+  else{P.hl=null;P.arrows=[{uci:r.best}];renderP();say("Pista 2: <em>"+m.san+"</em>. "+esc(describe(m)))}};
+$("#pFutureBtn").onclick=async()=>{if(P.busy)return;const fen=P.ch.fen();if(!P.pre||P.pre.fen!==fen)P.pre={fen,p:Engine.analyse(fen,{skill:20,time:500,prio:true,depth:2})};const r=await P.pre.p;if(P.ch.fen()!==fen)return;openFuture("#pFuture",fen,r&&r.pv,P.flip,"si jugás lo mejor")};
+$("#pUndo").onclick=()=>{if(P.busy&&!P.nexo)return;P.gen++;
+  if(P.nexo){hideNexo();P.ch.undo()}else if(P.ch.turn()===P.color){P.ch.undo();P.ch.undo();P.times.pop()}else{P.ch.undo();P.times.pop()}
+  const h=P.ch.history({verbose:true});P.last=h[h.length-1]||null;P.sel=null;P.legal=[];P.busy=false;$("#pFuture").hidden=true;fx("#pFx","poda");Sound.poda();
+  $("#pFeed").innerHTML='<p class="label"><span>Variante podada</span></p><p>Volvimos atrás. Otra idea.</p>';
+  if(P.ch.turn()!==P.color){renderP();botTurn()}else prepTurn("Línea podada.")};
+
+/* Modo ejercicios */
+function setMode(m){P.gen++;P.busy=false;P.mode=m;$("#mGame").setAttribute("aria-pressed",m==="game");$("#mEx").setAttribute("aria-pressed",m==="ex");
+  $("#pBtns").hidden=m!=="game";$("#xBtns").hidden=m!=="ex";$("#pCtl").hidden=m!=="game";$("#pMovesP").hidden=m!=="game";$("#pFuture").hidden=true;hideNexo();
+  if(m==="ex")loadEx();else{P.gen++;resumeGame()}}
+$("#mGame").onclick=()=>setMode("game");$("#mEx").onclick=()=>setMode("ex");
+function loadEx(id){
+  const q=exQueue();$("#exCount").textContent=q.length?q.length+" pendiente"+(q.length>1?"s":""):"";
+  const e=id?S.ex[id]:q[0];P.ex=e?{e,ch:new Chess(e.fen),sel:null,legal:[],solved:false,arrows:[]}:null;
+  if(!e){renderBoard($("#pBoard"),new Chess(),{flip:false});$("#pTurn").textContent="ejercicios";
+    say("No tengo ejercicios pendientes. Salen de tus errores: jugá contra mí o traé partidas de Lichess y aparecen acá.");$("#pFeed").innerHTML="";$("#xSol").disabled=true;$("#xNext").disabled=true;return}
+  $("#xSol").disabled=false;$("#xNext").disabled=q.length<2;
+  const g=gameById(e.gid),side=e.fen.split(" ")[1];P.ex.flip=side==="b";
+  $("#pTurn").textContent="ejercicio";
+  say("De tu partida"+(g?" contra <em>"+esc(g.color==="w"?g.black:g.white)+"</em>":"")+", jugada "+Math.ceil(e.ply/2)+". Ahí jugaste <span class=\"bad\">"+esc(e.played)+"</span>. "+esc(e.why)+" Encontrá algo mejor.");
+  $("#pFeed").innerHTML='<p class="label"><span>Ejercicio</span><b>Resuelto '+e.ok+' / 2</b></p><h2>Juegan las '+(side==="w"?"blancas":"negras")+'</h2><p>Se retira del archivo cuando lo resolvés dos veces.</p>';
+  renderEx()}
+function renderEx(){const x=P.ex;if(!x)return;renderBoard($("#pBoard"),x.ch,{flip:x.flip,sel:x.sel,dots:x.legal,arrows:x.arrows,last:x.last,anim:x.anim});x.anim=null}
+async function exClick(sq){const x=P.ex;if(!x||x.solved||x.busy)return;
+  if(x.sel){const m=x.legal.find(z=>z.to===sq);if(m){x.busy=true;const fen=x.ch.fen(),mv=x.ch.move({from:m.from,to:m.to,promotion:"q"});x.last=mv;x.anim=mv;x.sel=null;x.legal=[];renderEx();Sound.stamp();
+      say("Lo verifico…",true);let ok=x.e.best.slice(0,4)===m.from+m.to;
+      if(!ok){const [b,a]=await Promise.all([Engine.analyse(fen,{skill:20,time:350,prio:true,depth:2}),Engine.analyse(x.ch.fen(),{skill:20,time:350,prio:true,depth:2})]);const v=verdict(b,a,mv);ok=v==="mejor"||v==="buena"}
+      x.busy=false;x.e.tries++;x.e.last=Date.now();
+      if(ok){x.solved=true;x.e.ok++;Sound.win();say("<em>Correcto.</em> "+esc(describe(mv))+(x.e.ok>=2?" Ejercicio archivado.":" Vuelve una vez más para fijarlo."));checkAch()}
+      else{x.ch.undo();x.last=null;renderEx();Sound.alarm();say('<span class="bad">No.</span> '+esc(describe(mv))+" Probá otra. Si te trabás, tocá Ver solución.")}
+      save();return}}
+  const p=x.ch.get(sq);if(!p||p.color!==x.ch.turn()||x.sel===sq){x.sel=null;x.legal=[];renderEx();return}
+  x.sel=sq;x.legal=x.ch.moves({square:sq,verbose:true});renderEx()}
+$("#xSol").onclick=()=>{const x=P.ex;if(!x)return;const m=uciMove(x.e.fen,x.e.best);x.arrows=[{uci:x.e.best}];x.e.last=Date.now();save();renderEx();say("La solución: <em>"+(m?m.san:"")+"</em>. "+esc(describe(m))+" Vuelve más adelante para que la encuentres solo.")};
+$("#xNext").onclick=()=>{const q=exQueue(),cur=P.ex&&P.ex.e.id,nx=q.find(e=>e.id!==cur);loadEx(nx&&nx.id)};
+function resumeGame(){
+  if(P.ch.history().length&&!P.ch.game_over()){if(P.ch.turn()!==P.color){renderP();botTurn()}else prepTurn("Seguimos.")}
+  else{if(!P.ch.history().length){renderP();if(P.color==="b")botTurn();else prepTurn("Arrancás vos.")}else renderP()}}
+
+/* ================= REVISAR ================= */
+const R={cur:null,gi:0,mode:"guided",idx:0,sel:null,dots:[]};
+function renderList(){
+  const list=S.games;$("#rCount").textContent=list.length?list.length+" en el archivo":"";
+  if(!list.length){$("#rList").innerHTML='<p style="margin:0;color:var(--mute)">El archivo está vacío. Traé tus partidas desde Inicio con tu usuario de Lichess, jugá contra el analista o pegá un PGN abajo.</p>';return}
+  $("#rList").innerHTML=list.slice(0,40).map(g=>{const res=myResult(g),opp=g.color==="w"?g.black:g.color==="b"?g.white:g.white+" vs. "+g.black;
+    const st=g.done&&g.stats?(g.stats.errs?g.stats.errs+" error"+(g.stats.errs>1?"es":""):"sin errores"):"analizando…";
+    return'<button class="game'+(R.cur===g.id?" on":"")+'" data-g="'+g.id+'"><span class="res '+res+'">'+(res==="w"?"G":res==="l"?"P":res==="d"?"½":"·")+'</span><span style="min-width:0"><div class="ttl">'+esc(opp)+'</div><div class="sub">'+(g.source==="lichess"?"Lichess":g.source==="practica"?"Contra el analista":"PGN")+" · "+new Date(g.date).toLocaleDateString("es-AR",{day:"numeric",month:"short"})+(g.opening?" · "+esc(g.opening):"")+'</div></span><span class="st">'+st+"</span></button>"}).join("")}
+$("#rList").addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(b)openGame(b.dataset.g)});
+function openGame(id){R.cur=id;R.gi=0;R.mode="guided";R.idx=0;R.sel=null;R.dots=[];$("#rMain").hidden=false;$("#aFuture").hidden=true;$("#aFree").open=false;
+  const g=gameById(id);if(g&&!g.done)bgPrioritize(id);fx("#aFx","portal");renderList();renderReview();$("#rMain").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"})}
+function bgPrioritize(id){const i=S.games.findIndex(g=>g.id===id);if(i>0){const [g]=S.games.splice(i,1);S.games.unshift(g)}bgRun()}
+function myErrs(g){const out=[];for(let i=1;i<g.fens.length;i++){const v=g.verd&&g.verd[i];if((v==="impr"||v==="error"||v==="grave")&&(!g.color||g.moves[i-1].color===g.color))out.push(i)}return out}
+function aSay(h){$("#aSay").innerHTML=h}
+function renderReview(){const g=gameById(R.cur);if(!g)return;const flip=g.color==="b";
+  const k=g.ev?g.ev.filter(Boolean).length:0;$("#aProgBar").style.width=(k/g.fens.length*100)+"%";
+  renderMovesA(g);renderTimes(g);
+  if(R.mode==="free")return renderFree(g);
+  const card=$("#aCard");
+  if(!g.done){renderBoard($("#aBoard"),new Chess(g.fens[0]),{flip});aSay("Reviso el expediente con calma: "+k+" de "+g.fens.length+" posiciones. Cuando termine, vamos de a un error.");
+    card.innerHTML='<p class="label"><span>'+esc(g.opening||"Partida")+'</span></p><h2>'+esc(g.white)+' <span style="color:var(--mute);font-size:18px">vs.</span> '+esc(g.black)+"</h2><p>"+g.moves.length+" jugadas.</p>";return}
+  const errs=myErrs(g);
+  if(!errs.length){renderBoard($("#aBoard"),new Chess(g.fens[g.fens.length-1]),{flip,last:g.moves[g.moves.length-1]});
+    aSay("Expediente limpio: ni imprecisiones"+(g.color?" tuyas":"")+". Así se juega.");card.innerHTML='<p class="label"><span>Repaso</span></p><h2>Sin errores</h2>'+openingCard(g);return}
+  R.gi=Math.min(R.gi,errs.length-1);const i=errs[R.gi],m=g.moves[i-1],v=g.verd[i],b=g.ev[i-1],a=g.ev[i],fenB=g.fens[i-1],bm=b&&b.best?uciMove(fenB,b.best):null,t=g.times?g.times[i-1]:null,fast=t!=null&&g.fastT!=null&&t<g.fastT;
+  const mm=Object.assign({},m);
+  renderBoard($("#aBoard"),new Chess(fenB),{flip,last:i>1?g.moves[i-2]:null,arrows:[{uci:m.from+m.to,color:"#E5573F"},bm?{uci:b.best}:null]});
+  aSay(R.gi===0?"Encontré <em>"+errs.length+"</em> momento"+(errs.length>1?"s":"")+" para corregir. De a uno.":"Momento "+(R.gi+1)+" de "+errs.length+".");
+  let h='<p class="label"><span>Momento '+(R.gi+1)+" de "+errs.length+" · jugada "+Math.ceil(i/2)+"</span>"+(t!=null?'<b class="'+(fast?"err":"")+'">'+fmtSec(t)+(fast?" · apurada":"")+"</b>":"")+"</p>";
+  h+="<h2>"+m.san+' <span class="chip '+VERD[v].c+'">'+VERD[v].t+"</span></h2><p>"+esc(oneLine(v,fenB,mm,b,a))+"</p>";
+  if(fast&&(v==="error"||v==="grave"))h+='<p class="err" style="font-size:14px">La jugaste en '+fmtSec(t)+". Con capturas o jaques en el tablero, eso es poco.</p>";
+  if(bm)h+='<p class="best">Lo mejor era <b>'+bm.san+"</b> (flecha naranja).</p>";
+  h+='<details class="more"><summary>Ver más</summary><p>Jugaste: '+esc(describe(mm))+"</p>"+(bm?"<p>Lo mejor: "+esc(describe(bm))+"</p>":"")+"<p>Antes: "+esc(evalWords(b))+" Después: "+esc(evalWords(a))+"</p></details>";
+  h+='<div class="row" style="margin-top:12px"><button class="btn" id="gPrev">◀ Anterior</button><button class="btn main" id="gNext">Siguiente ▶</button><button class="btn" id="gFut">Ventana al futuro</button></div>';
+  if(R.gi===errs.length-1)h+=openingCard(g);
+  card.innerHTML=h;$("#gPrev").disabled=R.gi===0;$("#gNext").disabled=R.gi>=errs.length-1;
+  $("#gPrev").onclick=()=>{R.gi--;$("#aFuture").hidden=true;renderReview()};$("#gNext").onclick=()=>{R.gi++;$("#aFuture").hidden=true;Sound.stamp();renderReview()};
+  $("#gFut").onclick=()=>openFuture("#aFuture",fenB,b&&b.pv,flip,"si jugabas lo mejor")}
+function openingCard(g){return g.opening?'<div class="tip"><b>Apertura</b>'+esc(g.opening)+". "+esc(openingIdea(g.opening))+"</div>":""}
+function renderTimes(g){const el=$("#aTimes");
+  if(!g.times||!g.times.some(t=>t!=null)){el.innerHTML='<p class="label"><span>Tus tiempos</span></p><p style="margin:0;color:var(--mute);font-size:14px">Esta partida no trae reloj. Las de Lichess y las que jugás acá sí.</p>';return}
+  if(!g.done){el.innerHTML='<p class="label"><span>Tus tiempos</span></p><p style="margin:0;color:var(--mute);font-size:14px">Cuando termine el análisis te digo cómo usaste el reloj.</p>';return}
+  const mine=[];for(let i=1;i<g.fens.length;i++){if(!g.color||g.moves[i-1].color===g.color){const t=g.times[i-1];if(t!=null)mine.push({i,t,v:g.verd[i]})}}
+  const avg=mine.reduce((s,x)=>s+x.t,0)/(mine.length||1),fastE=mine.filter(x=>x.t<g.fastT&&(x.v==="error"||x.v==="grave")).length,slowOk=mine.filter(x=>x.t>=g.fastT&&(x.v==="mejor"||x.v==="buena")).length;
+  const errs=mine.filter(x=>x.v==="error"||x.v==="grave").length;
+  let verdictT=errs?(fastE/errs>=.5?"El apuro te costó: "+fastE+" de tus "+errs+" errores fueron jugadas de menos de "+fmtSec(g.fastT)+". Frená cuando haya capturas o jaques.":"Tus errores no vinieron del apuro: pensaste y aun así fallaste. Mirá qué deja atacado cada jugada."):"Sin errores: el reloj lo manejaste bien.";
+  /* barras por jugada */
+  const W=320,H=70,max=Math.max(...mine.map(x=>x.t),1),bw=W/Math.max(mine.length,1);
+  let svg='<svg class="chart" viewBox="0 0 '+W+" "+(H+14)+'" aria-label="Tiempo por jugada">';
+  mine.forEach((x,k)=>{const h=Math.max(1,x.t/max*H),c=x.v==="grave"||x.v==="error"?"#E5573F":x.v==="impr"?"#C99350":"#5A5A5A";svg+='<rect x="'+(k*bw+.5)+'" y="'+(H-h)+'" width="'+Math.max(1,bw-1)+'" height="'+h+'" fill="'+c+'"/>'});
+  svg+='<line x1="0" x2="'+W+'" y1="'+(H-g.fastT/max*H)+'" y2="'+(H-g.fastT/max*H)+'" stroke="#FF6A00" stroke-dasharray="3 3" stroke-width="1"/><text x="0" y="'+(H+12)+'">Tus jugadas, en orden · rojo = error · línea = apurada</text></svg>';
+  el.innerHTML='<p class="label"><span>Tus tiempos</span><b>Promedio '+fmtSec(avg)+"</b></p>"+svg+'<p style="margin:8px 0 0">'+esc(verdictT)+"</p>"}
+function renderFree(g){const i=R.idx,ch=new Chess(g.fens[i]),ev=g.ev&&g.ev[i],v=g.verd&&g.verd[i];
+  renderBoard($("#aBoard"),ch,{flip:g.color==="b",last:i?g.moves[i-1]:null,sel:R.sel,dots:R.dots,arrows:ev&&ev.best&&!R.sel?[{uci:ev.best}]:[]});
+  let h='<p class="label"><span>'+(i?"Jugada "+Math.ceil(i/2)+" · "+(g.moves[i-1].color==="w"?"blancas":"negras"):"Posición inicial")+"</span>"+(g.times&&i&&g.times[i-1]!=null?"<b>"+fmtSec(g.times[i-1])+"</b>":"")+"</p>";
+  if(i){const m=g.moves[i-1];h+="<h2>"+m.san+(v?' <span class="chip '+VERD[v].c+'">'+VERD[v].t+"</span>":"")+"</h2><p>"+esc(describe(Object.assign({},m)))+"</p>"}
+  h+="<p>"+esc(ch.game_over()?gameOverText(ch):evalWords(ev))+"</p>";if(ev&&ev.best){const nx=uciMove(g.fens[i],ev.best);if(nx)h+='<p class="best">Desde acá, lo mejor es <b>'+nx.san+"</b>.</p>"}
+  h+='<div class="row" style="margin-top:12px"><button class="btn" id="fBack">Volver al repaso</button></div>';$("#aCard").innerHTML=h;$("#fBack").onclick=()=>{R.mode="guided";R.sel=null;R.dots=[];renderReview()};
+  aSay("Navegación libre. Tocá una pieza del bando que mueve para ver sus movimientos.")}
+function renderMovesA(g){let h="";for(let i=0;i<g.moves.length;i+=2){h+='<span class="num">'+(i/2+1)+".</span>";
+  for(const k of [i,i+1]){if(k>=g.moves.length){h+="<span></span>";continue}const v=g.verd&&g.verd[k+1],mk=v&&VERD[v].mk?'<span class="mk '+VERD[v].c+'">'+VERD[v].mk+"</span>":"";
+    h+='<button class="mv'+(R.mode==="free"&&R.idx===k+1?" on":"")+'" data-i="'+(k+1)+'"><span>'+g.moves[k].san+"</span>"+mk+"</button>"}}$("#aMoves").innerHTML=h}
+function goFree(i){const g=gameById(R.cur);if(!g)return;R.mode="free";R.idx=Math.max(0,Math.min(g.fens.length-1,i));R.sel=null;R.dots=[];$("#aFuture").hidden=true;renderReview()}
+$("#aMoves").addEventListener("click",e=>{const b=e.target.closest(".mv");if(b)goFree(+b.dataset.i)});
+$("#aFirst").onclick=()=>goFree(0);$("#aPrev").onclick=()=>goFree(R.idx-1);$("#aNext").onclick=()=>goFree(R.idx+1);$("#aLast").onclick=()=>{const g=gameById(R.cur);if(g)goFree(g.fens.length-1)};
+onBoardClick($("#aBoard"),sq=>{const g=gameById(R.cur);if(!g||R.mode!=="free")return;const ch=new Chess(g.fens[R.idx]),p=ch.get(sq);
+  if(!p||R.sel===sq||p.color!==ch.turn()){R.sel=null;R.dots=[];renderReview();return}R.sel=sq;R.dots=ch.moves({square:sq,verbose:true});renderReview();
+  aSay(NAME[p.type]+" en "+sq+": "+R.dots.length+" movimiento"+(R.dots.length===1?"":"s")+'.<div class="legal">'+R.dots.map(m=>"<span>"+m.san+"</span>").join("")+"</div>")});
+function cleanPgn(t){let s=t.replace(/\r/g,"").replace(/\{[^}]*\}/g," ");let p;do{p=s;s=s.replace(/\([^()]*\)/g," ")}while(s!==p);return s.replace(/\$\d+/g," ").replace(/\d+\.\.\./g," ").replace(/[!?]+/g,"")}
+function clocksFromPgn(t){const out=[];const re=/\[%clk (\d+):(\d+):(\d+(?:\.\d+)?)\]/g;let m;while((m=re.exec(t)))out.push(Math.round((+m[1]*3600+ +m[2]*60+ +m[3])*100));return out}
+$("#bPgn").onclick=()=>{const t=$("#pgnIn").value.trim(),err=$("#pgnErr");err.hidden=true;if(!t){err.textContent="Pegá primero el PGN.";err.hidden=false;return}
+  const ch=new Chess();if(!ch.load_pgn(cleanPgn(t),{sloppy:true})||!ch.history().length){err.textContent="No pude leer esa partida. Copiá el PGN completo, con los corchetes y todas las jugadas.";err.hidden=false;return}
+  const hd=ch.header(),u=(S.user||"").toLowerCase();let color=$("#pgnSide").value||null;
+  if(!color&&u){if((hd.White||"").toLowerCase()===u)color="w";else if((hd.Black||"").toLowerCase()===u)color="b"}
+  const cl=clocksFromPgn(t),tc=(hd.TimeControl||"").split("+");
+  const site=(hd.Site||"").match(/lichess\.org\/(\w{8})/);const id=site?"li-"+site[1]:"pgn-"+Date.now();
+  if(gameById(id)){openGame(id);return}
+  const rec=buildRecord({id,source:site?"lichess":"pgn",sans:ch.history(),clocks:cl.length?cl:null,clock:cl.length&&tc[0]?{initial:+tc[0],increment:+(tc[1]||0)}:null,color,white:hd.White,black:hd.Black,
+    wr:+hd.WhiteElo||null,br:+hd.BlackElo||null,result:hd.Result||"*",opening:hd.Opening,date:hd.UTCDate?Date.parse(hd.UTCDate.replace(/\./g,"-")):Date.now()});
+  if(!rec){err.textContent="La partida tiene una jugada que no pude reproducir.";err.hidden=false;return}
+  S.games.unshift(rec);save();$("#pgnIn").value="";renderList();openGame(rec.id)};
+
+/* ================= PROGRESO ================= */
+function base20(){return S.games.filter(g=>g.done&&g.color).slice(0,20)}
+function consignas(){
+  const gs=base20();if(gs.length<2)return{n:gs.length,list:[{t:"Antes de soltar una pieza, mirá cada pieza tuya y preguntate quién la ataca.",w:"Consigna de arranque. Cuando haya dos partidas analizadas, las saco de tus errores."},{t:"Buscá primero jaques y capturas, tuyos y del rival.",w:"El hábito que más errores evita en tu nivel."},{t:"En la apertura: centro, caballos y alfiles afuera, enroque.",w:"Antes de la jugada 10, ninguna pieza se mueve dos veces sin motivo."}]};
+  let hang=0,gHang=0,missed=0,fastErr=0,errs=0,ph={a:0,m:0,f:0},fastTs=[];
+  for(const g of gs){const s=g.stats;hang+=s.hang;if(s.hang)gHang++;missed+=s.missed;fastErr+=s.fastErr;errs+=s.errs;ph.a+=s.phase.a;ph.m+=s.phase.m;ph.f+=s.phase.f;if(g.fastT)fastTs.push(g.fastT)}
+  const ft=fastTs.length?fastTs.reduce((a,b)=>a+b,0)/fastTs.length:null,c=[];
+  if(hang)c.push({s:hang*3,t:"Antes de soltar una pieza, revisá cada pieza tuya: ¿quién la ataca y quién la defiende?",w:"Dejaste piezas sin cuidar en "+gHang+" de "+gs.length+" partidas ("+hang+" veces)."});
+  if(fastErr&&errs&&ft)c.push({s:fastErr*2.5,t:"Con capturas o jaques en el tablero, no muevas antes de contar hasta diez.",w:Math.round(fastErr/errs*100)+"% de tus errores fueron jugadas de menos de "+fmtSec(ft)+"."});
+  if(missed)c.push({s:missed*2,t:"Antes de cada jugada, buscá todos los jaques y capturas. Primero los tuyos.",w:"Se te pasaron "+missed+" capturas o mates que estaban servidos."});
+  const top=Object.entries(ph).sort((a,b)=>b[1]-a[1])[0];
+  if(errs&&top[1]/errs>=.45){const nm={a:"la apertura",m:"el medio juego",f:"el final"}[top[0]];const tx={a:"Primeras diez jugadas: centro, desarrollo y enroque. Nada de aventuras.",m:"En el medio juego, antes de atacar, fijate que tu rey y tus piezas estén cubiertos.",f:"En el final, el rey es una pieza más: llevalo al centro."}[top[0]];
+    c.push({s:top[1]*1.5,t:tx,w:Math.round(top[1]/errs*100)+"% de tus errores aparecen en "+nm+"."})}
+  c.sort((a,b)=>b.s-a.s);
+  const fill=[{t:"Desarrollá caballos y alfiles antes de mover la dama.",w:"Principio general."},{t:"Después de la jugada del rival, preguntate qué amenaza.",w:"Principio general."},{t:"Cambiá piezas cuando vas ganando; evitá cambios cuando vas perdiendo.",w:"Principio general."}];
+  while(c.length<3)c.push(fill[c.length]);return{n:gs.length,list:c.slice(0,3)}}
+const ACH=[
+ {id:"first",t:"Expediente abierto",d:"Primera partida revisada.",ok:()=>S.games.some(g=>g.done)},
+ {id:"clean",t:"Mano firme",d:"Una partida sin errores graves.",ok:()=>S.games.some(g=>g.done&&g.color&&g.stats.grave===0&&g.stats.moves>=15)},
+ {id:"nohang3",t:"Nada colgado",d:"Tres partidas seguidas sin dejar piezas sin cuidar.",ok:()=>{const gs=S.games.filter(g=>g.done&&g.color&&g.stats.moves>=10).slice(0,3);return gs.length===3&&gs.every(g=>g.stats.hang===0)}},
+ {id:"calm",t:"Paciencia",d:"Una partida con reloj y sin errores por apuro.",ok:()=>S.games.some(g=>g.done&&g.color&&g.times&&g.stats.fastErr===0&&g.stats.moves>=15)},
+ {id:"ex5",t:"Corrector",d:"Cinco ejercicios resueltos.",ok:()=>Object.values(S.ex).reduce((s,e)=>s+(e.ok?1:0),0)>=5},
+ {id:"arch20",t:"Archivista",d:"Veinte partidas analizadas.",ok:()=>S.games.filter(g=>g.done).length>=20},
+ {id:"beat",t:"Le ganaste al analista",d:"Ganarle a Ferreyra en cualquier nivel.",ok:()=>S.games.some(g=>g.source==="practica"&&myResult(g)==="w")},
+ {id:"lvl5",t:"Ascenso",d:"Llegar al nivel 5.",ok:()=>S.level>=5||(S.maxLevel||0)>=5},
+ {id:"lvl10",t:"Jefe de división",d:"Llegar al nivel 10.",ok:()=>S.level>=10||(S.maxLevel||0)>=10},
+ {id:"days3",t:"Constancia",d:"Jugar tres días distintos en una semana.",ok:()=>{const now=Date.now();return S.days.filter(d=>now-d<7*864e5).length>=3}}];
+function markDay(){const d=new Date();d.setHours(0,0,0,0);const t=d.getTime();if(!S.days.includes(t))S.days.push(t);S.days=S.days.slice(-30)}
+function checkAch(){S.maxLevel=Math.max(S.maxLevel||0,S.level);for(const a of ACH)if(!S.ach[a.id]&&a.ok()){S.ach[a.id]=Date.now();toast("Logro",a.t+". "+a.d);Sound.win()}save()}
+function weekKey(ts){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
+function chartErr(){const gs=S.games.filter(g=>g.done&&g.color),by={};for(const g of gs){const k=weekKey(g.date);(by[k]=by[k]||[]).push(g.stats.errs)}
+  const ks=Object.keys(by).map(Number).sort((a,b)=>a-b).slice(-8);if(!ks.length)return'<p style="margin:0;color:var(--mute);font-size:14px">Aparece cuando tengas partidas analizadas.</p>';
+  const vals=ks.map(k=>by[k].reduce((a,b)=>a+b,0)/by[k].length),mx=Math.max(2,Math.ceil(Math.max(...vals))),W=320,H=120,L=24,bw=(W-L)/8;
+  let s='<svg class="chart" viewBox="0 0 '+W+" "+(H+20)+'">';for(let y=0;y<=mx;y+=Math.max(1,Math.ceil(mx/4))){const yy=H-y/mx*H;s+='<line x1="'+L+'" x2="'+W+'" y1="'+yy+'" y2="'+yy+'" stroke="#2B2A28"/><text x="0" y="'+(yy+4)+'">'+y+"</text>"}
+  ks.forEach((k,i)=>{const v=vals[i],h=v/mx*H,x=L+i*bw+bw*.18;s+='<rect x="'+x+'" y="'+(H-h)+'" width="'+bw*.64+'" height="'+h+'" fill="'+(i===ks.length-1?"#FF6A00":"#5A5A5A")+'"/><text x="'+(x+bw*.32)+'" y="'+(H+14)+'" text-anchor="middle">'+new Date(k).toLocaleDateString("es-AR",{day:"numeric",month:"numeric"})+'</text><text x="'+(x+bw*.32)+'" y="'+(H-h-4)+'" text-anchor="middle" style="fill:#EDEAE4">'+v.toFixed(1).replace(".",",")+"</text>"});
+  return s+"</svg>"}
+function chartRt(){const pts=S.games.filter(g=>g.source==="lichess"&&g.color).map(g=>({t:g.date,r:g.color==="w"?g.wr:g.br})).filter(p=>p.r).sort((a,b)=>a.t-b.t).slice(-20);
+  if(pts.length<2)return'<p style="margin:0;color:var(--mute);font-size:14px">Aparece cuando traigas al menos dos partidas de Lichess.</p>';
+  const lo=Math.floor((Math.min(...pts.map(p=>p.r))-20)/50)*50,hi=Math.ceil((Math.max(...pts.map(p=>p.r))+20)/50)*50,W=320,H=120,L=36,sx=i=>L+i/(pts.length-1)*(W-L-8),sy=r=>H-(r-lo)/(hi-lo)*H;
+  let s='<svg class="chart" viewBox="0 0 '+W+" "+(H+20)+'">';for(let r=lo;r<=hi;r+=Math.max(50,Math.round((hi-lo)/3/50)*50)){s+='<line x1="'+L+'" x2="'+W+'" y1="'+sy(r)+'" y2="'+sy(r)+'" stroke="#2B2A28"/><text x="0" y="'+(sy(r)+4)+'">'+r+"</text>"}
+  const d=pts.map((p,i)=>(i?"L":"M")+sx(i).toFixed(1)+" "+sy(p.r).toFixed(1)).join(" ");
+  s+='<path d="'+d+" L"+sx(pts.length-1)+" "+H+" L"+sx(0)+" "+H+' Z" fill="rgba(255,106,0,.12)"/><path d="'+d+'" fill="none" stroke="#FF6A00" stroke-width="2"/>';
+  const lp=pts[pts.length-1];s+='<circle cx="'+sx(pts.length-1)+'" cy="'+sy(lp.r)+'" r="4" fill="#FF6A00"/><text x="'+L+'" y="'+(H+14)+'">últimas '+pts.length+" partidas</text></svg>";$("#rtNow").textContent=lp.r;return s}
+function renderProgress(){
+  const c=consignas();$("#cBase").textContent=c.n>=2?"según "+c.n+" partidas":"";
+  $("#consignas").innerHTML=c.list.map((x,i)=>'<div class="order"><div class="num">Consigna '+(i+1)+'</div><p>'+esc(x.t)+"</p><small>"+esc(x.w)+"</small></div>").join("");
+  const gs=base20(),tot=k=>gs.reduce((s,g)=>s+g.stats[k],0);
+  $("#pStats").innerHTML=[["Partidas analizadas",S.games.filter(g=>g.done).length],["Piezas sin cuidar",gs.length?tot("hang"):"—","últimas "+gs.length],["Errores por apuro",gs.length?tot("fastErr"):"—"],["Ejercicios resueltos",Object.values(S.ex).filter(e=>e.ok).length]].map(s=>'<div class="stat"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+(s[2]?" <small>"+s[2]+"</small>":"")+"</div></div>").join("");
+  $("#chErr").innerHTML=chartErr();$("#chRt").innerHTML=chartRt();
+  $("#achN").textContent=Object.keys(S.ach).length+" / "+ACH.length;
+  $("#ach").innerHTML=ACH.map(a=>'<div class="ac'+(S.ach[a.id]?" on":"")+'"><b>'+a.t+"</b><span>"+a.d+"</span>"+(S.ach[a.id]?'<span class="stamp">Sellado '+new Date(S.ach[a.id]).toLocaleDateString("es-AR")+"</span>":"")+"</div>").join("")}
+$("#bExp").onclick=()=>{if(/claude|claudeusercontent/.test(location.hostname)){$("#bkTxt").textContent="En esta vista previa no se pueden descargar archivos. En la app publicada en GitHub sí.";return}try{const blob=new Blob([JSON.stringify(S)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="archivo64-respaldo-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();$("#bkTxt").textContent="Respaldo descargado. Subilo a la carpeta Archivo 64 de tu Drive."}catch(e){$("#bkTxt").textContent="No pude descargar el archivo desde acá. En la app instalada funciona."}};
+$("#fImp").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.games))throw 0;S=Object.assign({},DEF,d);save();$("#bkTxt").textContent="Respaldo cargado: "+S.games.length+" partidas.";boot()}catch(x){$("#bkTxt").textContent="Ese archivo no es un respaldo de Archivo 64."}};r.readAsText(f)};
+
+/* ================= INICIO ================= */
+function renderHome(){
+  const c=consignas(),dayIdx=Math.floor(Date.now()/864e5)%c.list.length,o=c.list[dayIdx];
+  $("#order").innerHTML='<div class="num">Consigna del día</div><p>'+esc(o.t)+"</p><small>"+esc(o.w)+"</small>";
+  $("#lUser").textContent=S.user||"";$("#iUser").value=S.user||"";
+  const done=S.games.filter(g=>g.done),pend=exQueue().length;
+  $("#stats").innerHTML=[["Rating Lichess",S.rating||"—",S.rating?(S.ratings.rapid?"rápidas":S.ratings.classical?"clásicas":"blitz"):""],["Nivel a64",S.level,"/ 10"],["Partidas",done.length,"revisadas"],["Ejercicios",pend,"pendientes"]].map(s=>'<div class="stat"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+(s[2]?" <small>"+s[2]+"</small>":"")+"</div></div>").join("");
+  if(!$("#syncTxt").textContent)$("#syncTxt").textContent=S.lastSync?"Última vez que traje partidas: "+new Date(S.lastSync).toLocaleString("es-AR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+".":"Poné tu usuario y traigo tus últimas 20 partidas con los relojes.";
+  const lg=S.games[0];
+  $("#lastGame").innerHTML=lg?'<p class="label"><span>Última partida</span><b>'+(lg.source==="lichess"?"Lichess":"Analista")+'</b></p><h2 class="t">'+esc(lg.color==="w"?lg.black:lg.color==="b"?lg.white:lg.white+" vs. "+lg.black)+'</h2><p style="margin:6px 0 0;color:var(--mute)">'+({w:"Ganaste",l:"Perdiste",d:"Tablas"}[myResult(lg)]||"Resultado sin dato")+(lg.opening?" · "+esc(lg.opening):"")+(lg.done&&lg.stats?" · "+lg.stats.errs+" error"+(lg.stats.errs===1?"":"es"):" · en análisis")+'</p><div class="row" style="margin-top:12px"><button class="btn main" id="hRev">Revisar</button><button class="btn" id="hPlay">Jugar contra el analista</button></div>'
+    :'<p class="label"><span>Empezá</span></p><h2 class="t">Jugá contra el analista</h2><p style="margin:6px 0 0;color:var(--mute)">O traé tus partidas de Lichess arriba.</p><div class="row" style="margin-top:12px"><button class="btn main" id="hPlay">Jugar</button></div>';
+  if($("#hRev"))$("#hRev").onclick=()=>{go("revisar");openGame(lg.id)};$("#hPlay").onclick=()=>{go("jugar");if(P.mode!=="game")setMode("game")};
+  const ex=exQueue()[0];
+  $("#dailyEx").innerHTML=ex?'<p class="label"><span>Ejercicio del día</span><b>'+pend+" pendiente"+(pend>1?"s":"")+'</b></p><h2 class="t">Una posición tuya</h2><p style="margin:6px 0 0;color:var(--mute)">Ahí jugaste '+esc(ex.played)+". Encontrá lo que correspondía.</p>"+'<div class="row" style="margin-top:12px"><button class="btn main" id="hEx">Resolver</button></div>'
+    :'<p class="label"><span>Ejercicios</span></p><h2 class="t">Todavía no hay</h2><p style="margin:6px 0 0;color:var(--mute)">Salen de tus propios errores, después de cada partida analizada.</p>';
+  if($("#hEx"))$("#hEx").onclick=()=>{go("jugar");setMode("ex")};
+  bgUI()}
+
+/* ================= Navegación ================= */
+let view="inicio";
+function go(v){view=v;["inicio","jugar","revisar","progreso"].forEach(k=>$("#v-"+k).hidden=k!==v);$$(".nav [data-go]").forEach(b=>b.toggleAttribute("aria-current",b.dataset.go===v)&&b.setAttribute("aria-current","page"));
+  if(v==="inicio")renderHome();if(v==="revisar")renderList();if(v==="progreso")renderProgress();if(v==="jugar")applyTilt();
+  try{history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo(0,0)}
+$$(".nav [data-go]").forEach(b=>b.onclick=()=>{Sound.c();go(b.dataset.go)});
+
+/* ================= Arranque ================= */
+function boot(){
+  setSoundBtn();$("#pGuard").checked=S.guard;S.level=Math.max(1,Math.min(10,S.level||2));applyTilt();
+  if(S.practice&&S.practice.pgn){try{P.ch.load_pgn(S.practice.pgn);P.color=S.practice.color;P.flip=S.practice.flip;P.times=S.practice.times||[];$("#pColor").value=P.color;const h=P.ch.history({verbose:true});P.last=h[h.length-1]||null}catch(e){P.ch=new Chess()}}
+  $("#pFeed").innerHTML=P.ch.history().length?'<p class="label"><span>Expediente en curso</span></p><h2>Seguís con '+(P.color==="w"?"blancas":"negras")+"</h2>":'<p class="label"><span>Cómo funciona</span></p><h2>Jugás contra el analista</h2><p>Tocá una pieza: sus movimientos aparecen en naranja. Juego después de una pausa. Si vas a cometer un error, te freno antes.</p>';
+  resumeGame();
+  const h=(location.hash||"").slice(1);go(["jugar","revisar","progreso"].includes(h)?h:"inicio");
+  if(S.games.some(g=>!g.done))bgRun();
+  if(S.user&&Date.now()-S.lastSync>6*3600e3)syncLichess();
+  checkAch()}
+if(typeof Chess==="undefined"){document.querySelector("main .wrap").innerHTML='<p class="panel">No se pudo cargar la librería de ajedrez. Revisá la conexión y recargá.</p>';return}
+Engine.init();boot();
+if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude|claudeusercontent/.test(location.hostname)){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+})();
+</script>
