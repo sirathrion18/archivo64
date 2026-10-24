@@ -11,7 +11,13 @@ A64.BOARD_THEMES = {
   verde:   {name:"Verde",        l:"#EEEED2", d:"#769656"},
   azul:    {name:"Azul",         l:"#DEE3E6", d:"#8CA2AD"},
   gris:    {name:"Gris a64",     l:"#E6E1D7", d:"#8E8B85"},
-  noche:   {name:"Noche",        l:"#9FA4AA", d:"#4D5560"}
+  noche:   {name:"Noche",        l:"#9FA4AA", d:"#4D5560"},
+  marmol:  {name:"Mármol",       l:"#ECEAE6", d:"#A3A8AC", lock:true},
+  naranja: {name:"Oficina",      l:"#F6E3CF", d:"#D98A4B", lock:true},
+  cereza:  {name:"Cereza",       l:"#F3D9D4", d:"#B5625C", lock:true},
+  papel:   {name:"Papel",        l:"#FBF8F0", d:"#C9C2B4", lock:true},
+  medianoche:{name:"Medianoche", l:"#7C8A99", d:"#2F3B4A", lock:true},
+  torneo:  {name:"Torneo",       l:"#FFFFDD", d:"#86A666", lock:true}
 };
 
 /* ---------- Sets de piezas ---------- */
@@ -44,27 +50,30 @@ function stauntonSVG(c,t){
   return '<svg viewBox="0 0 100 140" preserveAspectRatio="xMidYMax meet"><g fill="'+(w?"url(#a64gw)":"url(#a64gb)")+'" stroke="'+(w?"#3A3127":"#000")+'" stroke-width="2" stroke-linejoin="round">'+ST_BASE+ST[t]+'</g><path d="M31.5 121.6 C38 119.6 62 119.6 68.5 121.6" fill="none" stroke="#FF6A00" stroke-width="1.8"/>'+(t==="n"?'<circle cx="41.5" cy="49" r="2.4" fill="'+(w?"#2A2218":"#FF6A00")+'"/>':"")+"</svg>";
 }
 /* Pixel: piezas de 12×12, con la misma estética que el logo a64. */
-const PX={
- p:["............","............",".....##.....","....####....","....####....",".....##.....","....####....",".....##.....",".....##.....","....####....","...######...","..########.."],
- k:[".....##.....","....####....",".....##.....","...######...","..########..","..########..","...######...","....####....","....####....","...######...","..########..","..########.."],
- q:[".#...##...#.",".#..####..#.",".##..##..##.","..########..","...######...","....####....","....####....","....####....","....####....","...######...","..########..","..########.."],
- r:["..##.##.##..","..########..","...######...","....####....","....####....","....####....","....####....","....####....","...######...","...######...","..########..","..########.."],
- b:[".....##.....","....####....","...##.###...","...#.####...","...######...","....####....",".....##.....","....####....","....####....","...######...","..########..","..########.."],
- n:["....#.#.....","...######...","..##.####...",".########...",".#########..","..##..####..","......####..",".....#####..","....######..","...######...","..########..","..########.."]
-};
-function pixelSVG(c,t){
-  const w=c==="w",fill=w?"#FAF8F3":"#2A2826",edge=w?"#1B1A18":"#FF6A00",m=PX[t];let r="";
-  const on=(x,y)=>y>=0&&y<12&&x>=0&&x<12&&m[y][x]==="#";
-  for(let y=-1;y<13;y++)for(let x=-1;x<13;x++){
-    if(on(x,y)){r+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="1.02" height="1.02" fill="'+fill+'"/>';continue}
-    let near=false;for(let dy=-1;dy<=1&&!near;dy++)for(let dx=-1;dx<=1;dx++)if(on(x+dx,y+dy)){near=true;break}
-    if(near)r+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="1.02" height="1.02" fill="'+edge+'"/>'}
-  return '<svg viewBox="0 0 14 14" shape-rendering="crispEdges">'+r+"</svg>";
+const PX={"p":["......................","......................","......................","......................","......................","......................",".........oooo.........","........oooooo........",".......oooooooo.......",".......oooooooo.......",".......oooooooo.......",".......oooooooo.......",".......ooooooo........","........oooooo........",".......ooooooo........",".......oooooooo.......","........ooooo.........","........oooooo........","........oooooo........",".......ooooooo........",".......oooooooo.......",".......oooooooo.......",".......oooooooo.......",".......oooooooo.......","...oooooooooooooooo...","..oooooooooooooooooo..","..oooooooooooooooooo..","......................"],"r":["......................","......................","......................","......................","......................",".....ooo.ooo..ooo.....",".....ooo.ooo..ooo.....",".....oooooooooooo.....",".....oooooooooooo.....",".....oooooooooooo.....",".....oooooooooooo.....",".....oooooooooooo.....",".....odddddddddoo.....",".....oddddddddddo.....","......oooooooooo......","......oooooooooo......","......oooooooooo......","......oooooooooo......","......oooooooooo......","......oooooooooo......","......oooooooooo......","......oooooooooo......",".....ooooooooooo......",".....oooooooooooo.....","...oooooooooooooooo...","..oooooooooooooooooo..","..oooooooooooooooooo..","......................"],"b":["..........oo..........",".........oooo.........","..........oo..........","..........oo..........",".........oooo.........","........ooooo.........","........oooodo........",".......ooooddo........",".......oooddooo.......",".......ooodoooo.......",".......ooddoooo.......",".......oooooooo.......",".......oooooooo.......","........oooooo........",".......oooooooo.......",".......oooooooo.......",".........oooo.........",".........oooo.........",".........oooo.........","........ooooo.........","........oooooo........","........oooooo........",".......oooooooo.......",".......oooooooo.......","...oooooooooooooooo...","..oooooooooooooooooo..","..oooooooooooooooooo..","......................"],"n":["......................","......................",".........o............","........ooo...........","........oooooo........",".......ooooodoo.......",".......oooooddoo......","......doooooodooo.....",".....oddoooooodoo.....","....oooooooooodooo....","...ooooooooooodooo....","..ooooooooooooddoo....","..ooooooooooooddoo....","..ooooooooooooddoo....","...oooooooooooddoo....",".......ooooooodooo....",".......ooooooodooo....","......oooooooooooo....","......ooooooooooo.....",".....oooooooooooo.....",".....oooooooooooo.....",".....oooooooooooo.....",".....ooooooooooo......",".....ooooooooooo......","...oooooooooooooooo...","..oooooooooooooooooo..","..oooooooooooooooooo..","......................"],"q":["......................",".......ooo..oo........",".......ooo.oooo.......","..oo....oo..oo...ooo..",".oooo...o...oo...ooo..","..oo....oo..oo...ooo..","....o...oo.ooo...o....","....oo..oooooo..oo....","....oooooooooo.ooo....","....ooooooooooooo.....",".....oooooooooooo.....",".....oooooooooooo.....",".....ooooooooooo......","......oooooooooo......","......ooooooooo.......","......ooooooooo.......","........ooooo.........","........oooooo........","........oooooo........","........oooooo........",".......oooooooo.......",".......oooooooo.......","......ooooooooo.......","......oooooooooo......","...oooooooooooooooo...","..oooooooooooooooooo..","..oooooooooooooooooo..","......................"],"k":["......................","..........oo..........","..........oo..........","........oooooo........","........oooooo........","..........oo..........","..........oo..........",".........oooo.........",".......oooooooo.......",".......oooooooo.......","......oooooooooo......","......ooooooooo.......","......ooooooooo.......","......ooooooooo.......","......ooooooooo.......","......ooooooooo.......","........ooooo.........","........oooooo........","........oooooo........","........oooooo........",".......oooooooo.......",".......oooooooo.......","......ooooooooo.......","......oooooooooo......","...oooooooooooooooo...","..oooooooooooooooooo..","..oooooooooooooooooo..","......................"]};
+/* Pixel HD: contorno afuera, luz a la izquierda y sombra a la derecha, detalles marcados. */
+const PXPAL={pixel:{w:{o:"#1A1816",f:"#F2ECE0",h:"#FFFFFF",s:"#C4B79F",d:"#1A1816"},b:{o:"#0A0908",f:"#46413B",h:"#716A60",s:"#25221E",d:"#D9CFBC"}},
+  pixeloro:{w:{o:"#3A2A05",f:"#F2C94C",h:"#FFF1B8",s:"#C9962A",d:"#3A2A05"},b:{o:"#0A0908",f:"#8C96A3",h:"#C8D0DA",s:"#5A6370",d:"#1A1816"}}};
+function pixelSVG(c,t,pal){
+  const P=(PXPAL[pal]||PXPAL.pixel)[c],m=PX[t],H=m.length,W=m[0].length;let r="";
+  const on=(x,y)=>y>=0&&y<H&&x>=0&&x<W&&m[y][x]!==".";
+  for(let y=-1;y<=H;y++)for(let x=-1;x<=W;x++){
+    let col=null;
+    if(on(x,y)){const ch=m[y][x];if(ch==="d")col=P.d;else if(!on(x-1,y)||!on(x,y-1))col=P.h;else if(!on(x+1,y)||!on(x,y+1)||!on(x+1,y+1))col=P.s;else col=P.f}
+    else{for(let dy=-1;dy<=1&&!col;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&on(x+dx,y+dy)){col=P.o;break}}
+    if(col)r+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="1.02" height="1.02" fill="'+col+'"/>'}
+  return '<svg viewBox="0 0 '+(W+2)+" "+(H+2)+'" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges">'+r+"</svg>";
 }
+/* Variantes de color del set plano (se desbloquean con logros) */
+function flatPal(c,t,pal){const P={oficina:{w:["#FAF8F3","#FF6A00","#1B1A18"],b:["#24221F","#FF6A00","#FF6A00"]},madera:{w:["#F1D9A7","#5B3A1A","#5B3A1A"],b:["#6B3F1F","#2A170A","#F1D9A7"]}}[pal][c];
+  return '<svg viewBox="0 0 100 100"><g fill="'+P[0]+'" stroke="'+P[1]+'" stroke-width="3.4" stroke-linejoin="round">'+FLAT.base+FLAT[t].replace(/class="dl"/g,'stroke="'+P[2]+'"').replace(/class="d"/g,'stroke="'+P[2]+'" fill="'+P[2]+'"')+"</g></svg>"}
 A64.PIECE_SETS = {
   plano:{name:"Plano",svg:flatSVG,tall:false},
   staunton:{name:"Staunton",svg:stauntonSVG,tall:true},
-  pixel:{name:"Pixel",svg:pixelSVG,tall:false}
+  pixel:{name:"Pixel",svg:(c,t)=>pixelSVG(c,t,"pixel"),tall:false},
+  oficina:{name:"Oficina",svg:(c,t)=>flatPal(c,t,"oficina"),tall:false,lock:true},
+  madera:{name:"Madera",svg:(c,t)=>flatPal(c,t,"madera"),tall:false,lock:true},
+  pixeloro:{name:"Pixel oro",svg:(c,t)=>pixelSVG(c,t,"pixeloro"),tall:false,lock:true}
 };
 const pieceCache={};
 A64.pieceSVG=function(set,c,t){const k=set+c+t;if(!pieceCache[k])pieceCache[k]=(A64.PIECE_SETS[set]||A64.PIECE_SETS.plano).svg(c,t);return pieceCache[k]};

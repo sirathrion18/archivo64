@@ -58,7 +58,8 @@ A64.makeBoard=(el,opts)=>{const b=new A64.Board(el,opts);A64.boards=A64.boards.f
 
 A64.openSettings=()=>{
   const ov=$("#ovSettings"),body=$("#setBody"),s=S.settings;
-  const sw=(key,val,label,inner)=>'<button class="sw" data-k="'+key+'" data-v="'+val+'" aria-pressed="'+(String(s[key])===String(val))+'">'+inner+"<span>"+label+"</span></button>";
+  const lockOf=(key,val)=>{const kind=key==="board"?"board":"pieces";if(val==="custom"||A64.unlocked(kind,val))return null;const a=A64.rewardFor(kind,val);return a?a.name+(a.tier?" ("+A64.TIERN[a.tier]+")":""):"un logro"};
+  const sw=(key,val,label,inner)=>{const lk=lockOf(key,val);return'<button class="sw'+(lk?" locked":"")+'" data-k="'+key+'" data-v="'+val+'" '+(lk?'data-lock="'+A64.esc(lk)+'" title="Se desbloquea con: '+A64.esc(lk)+'"':"")+' aria-pressed="'+(String(s[key])===String(val))+'">'+inner+"<span>"+label+"</span></button>"};
   const boardSw=Object.entries(A64.BOARD_THEMES).map(([k,t])=>sw("board",k,t.name,'<span class="mini4"><i style="background:'+t.l+'"></i><i style="background:'+t.d+'"></i><i style="background:'+t.d+'"></i><i style="background:'+t.l+'"></i></span>')).join("")
     +sw("board","custom","A tu gusto",'<span class="mini4"><i style="background:'+s.custom.l+'"></i><i style="background:'+s.custom.d+'"></i><i style="background:'+s.custom.d+'"></i><i style="background:'+s.custom.l+'"></i></span>');
   const pcSw=Object.entries(A64.PIECE_SETS).map(([k,t])=>sw("pieces",k,t.name,'<span class="pcprev">'+A64.pieceSVG(k,"w","n")+"</span>")).join("");
@@ -73,11 +74,13 @@ A64.openSettings=()=>{
    +'<label class="switch"><span>Animaciones</span><input type="checkbox" id="sAnim"'+(s.anim?" checked":"")+'></label>'
    +'<div class="switch"><span>Tema</span><div class="seg" id="sTheme"><button data-v="dark" aria-pressed="'+(s.theme!=="light")+'">Oscuro</button><button data-v="light" aria-pressed="'+(s.theme==="light")+'">Claro</button></div></div>'
    +'<div class="switch"><span>Jugadas escritas con</span><div class="seg" id="sNot"><button data-v="fig" aria-pressed="'+(s.notation!=="es")+'">♘f3</button><button data-v="es" aria-pressed="'+(s.notation==="es")+'">Cf3</button></div></div>'
+   +'<div class="switch"><span>Título</span><select id="sTitle">'+Object.entries(A64.TITLES).filter(([k])=>A64.unlocked("title",k)).map(([k,v])=>'<option value="'+k+'"'+((S.title||"pasante")===k?" selected":"")+'>'+v+'</option>').join("")+'</select></div>'
+   +'<div class="switch"><span>Avatar</span><select id="sAvatar">'+Object.entries(A64.AVATARS).filter(([k])=>A64.unlocked("avatar",k)).map(([k,v])=>'<option value="'+k+'"'+((S.avatar||"ini")===k?" selected":"")+'>'+v.name+'</option>').join("")+'</select></div>'
    +'<div class="switch"><span>Tu usuario de Lichess</span><input type="text" id="sUser" value="'+A64.esc(S.user)+'" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:160px"></div>'
    +'</div><p class="mute" style="font-size:13px">Atajos en la compu: ← → jugadas · F girar tablero · H pista · Esc cerrar. Clic derecho y arrastrar dibuja flechas (con Shift, en rojo).</p>';
   const prev=A64.makeBoard($("#setPrev",body),{noCoords:false});prev.position("r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4");prev.last={from:"g8",to:"f6"};prev.setArrows([{from:"f3",to:"g5",color:"green"}]);prev.render();
   const upd=()=>{A64.applySettings();A64.save();prev.render()};
-  $$(".sw",body).forEach(b=>b.onclick=()=>{s[b.dataset.k]=b.dataset.v;$$('.sw[data-k="'+b.dataset.k+'"]',body).forEach(x=>x.setAttribute("aria-pressed",x===b));$("#customRow",body).hidden=s.board!=="custom";upd()});
+  $$(".sw",body).forEach(b=>b.onclick=()=>{if(b.dataset.lock){A64.toast("Bloqueado","Se desbloquea con el logro «"+b.dataset.lock+"».");return}S.cnt=S.cnt||{};S.cnt["deco_"+b.dataset.k]=1;if(S.cnt.deco_board&&S.cnt.deco_pieces)S.cnt.deco=1;s[b.dataset.k]=b.dataset.v;$$('.sw[data-k="'+b.dataset.k+'"]',body).forEach(x=>x.setAttribute("aria-pressed",x===b));$("#customRow",body).hidden=s.board!=="custom";upd()});
   $("#cL",body).oninput=e=>{s.custom.l=e.target.value;if(s.board==="custom")upd()};$("#cD",body).oninput=e=>{s.custom.d=e.target.value;if(s.board==="custom")upd()};
   $("#sCoords",body).onchange=e=>{s.coords=e.target.checked;upd()};
   $("#s3d",body).onchange=e=>{s.d3=e.target.checked;$("#tiltRow",body).hidden=!s.d3;upd()};
@@ -86,8 +89,9 @@ A64.openSettings=()=>{
   $("#sAnim",body).onchange=e=>{s.anim=e.target.checked;upd()};
   $$("#sTheme button",body).forEach(b=>b.onclick=()=>{s.theme=b.dataset.v;$$("#sTheme button",body).forEach(x=>x.setAttribute("aria-pressed",x===b));upd()});
   $$("#sNot button",body).forEach(b=>b.onclick=()=>{s.notation=b.dataset.v;$$("#sNot button",body).forEach(x=>x.setAttribute("aria-pressed",x===b));upd();A64.rerender()});
+  $("#sTitle",body).onchange=e=>{S.title=e.target.value;A64.save()};$("#sAvatar",body).onchange=e=>{S.avatar=e.target.value;A64.save()};
   $("#sUser",body).onchange=e=>{S.user=e.target.value.trim();S.lastSync=0;A64.save()};
-  ov.hidden=false;const close=()=>{ov.hidden=true;A64.rerender()};$("[data-close]",ov).onclick=close;ov.onclick=e=>{if(e.target===ov)close()};
+  ov.hidden=false;const close=()=>{ov.hidden=true;A64.checkAch();A64.rerender()};$("[data-close]",ov).onclick=close;ov.onclick=e=>{if(e.target===ov)close()};
 };
 
 /* ================= navegación ================= */
@@ -124,8 +128,8 @@ A64.srs={
 A64.daily=()=>{const t=A64.today();if(!S.daily||S.daily.date!==t)S.daily={date:t,op:0,pz:0,game:0,cards:0};return S.daily};
 A64.markDay=()=>{const d=new Date();d.setHours(0,0,0,0);const t=d.getTime();if(!S.days.includes(t)){S.days.push(t);S.days=S.days.slice(-60)}A64.save()};
 A64.streak=()=>{const set=new Set(S.days);let n=0;const d=new Date();d.setHours(0,0,0,0);let t=d.getTime();if(!set.has(t))t-=DAY;while(set.has(t)){n++;t-=DAY}return n};
-A64.dailyTarget={op:2,pz:5,game:1};
-A64.bump=(k,n)=>{const d=A64.daily();d[k]=(d[k]||0)+(n||1);A64.markDay();A64.save();A64.checkAch()};
+A64.dailyTarget={op:2,pz:5,game:1,mg:1};
+A64.bump=(k,n)=>{const d=A64.daily();d[k]=(d[k]||0)+(n||1);const T=A64.dailyTarget;if(!d.planDone&&Object.keys(T).every(x=>(d[x]||0)>=T[x])){d.planDone=true;S.cnt=S.cnt||{};S.cnt.planDays=(S.cnt.planDays||0)+1;A64.toast("Plan del día","Completo. Buen trabajo.")}A64.markDay();A64.save();A64.checkAch()};
 
 /* ================= niveles y agentes ================= */
 A64.rating=l=>400+(l-1)*70;

@@ -7,7 +7,8 @@ Tu archivo de ajedrez: jugás contra los agentes de la oficina (niveles 1 a 30),
 - **Jugar**: cuatro agentes (agresivo, posicional, tramposo, defensivo), nivel adaptativo 1–30, relojes 10+0 / 5+3 / 3+2, modos Entrenamiento / Normal / Torneo, empezar desde una apertura del repertorio.
 - **Aprender**: 17 aperturas en capítulos (idea, jugada por jugada con el porqué, planes, trampas, práctica), 24 tarjetas de estrategia, puzzles (tus errores, los de la oficina y de Lichess), juego de coordenadas, finales esenciales.
 - **Revisar**: precisión, gráfico de evaluación, explicación de cada error con su tema táctico, "aprendé de tus errores", uso del reloj e informe de torneo.
-- **Progreso**: consignas, errores por semana, rating, temas que más fallás, escalera del analista, logros y respaldo.
+- **Minijuegos**: ocho juegos en tableros chicos (Ruta del caballo, Guerra de peones, Mate relámpago, Comé todo, ¿Qué está colgado?, Casilla segura, Contá atacantes, Recorrido de la dama), desafío del día y calendario.
+- **Progreso**: consignas, errores por semana, rating, temas que más fallás, escalera del analista, 190 logros en expedientes sellados con desbloqueos, y respaldo.
 
 ## Publicación
 GitHub Pages desde la rama `main`, carpeta raíz: https://sirathrion18.github.io/archivo64/

@@ -3,9 +3,9 @@
 "use strict";
 const A64=window.A64,S=A64.S,$=A64.$,$$=A64.$$,esc=A64.esc,F=x=>A64.figSan(x.san,x.color);
 let root=null,tab="aperturas",cleanup=null,keyH=null;
-const TABS=[["aperturas","Aperturas"],["estrategia","Estrategia"],["puzzles","Puzzles"],["coordenadas","Coordenadas"],["finales","Finales"]];
+const TABS=[["aperturas","Aperturas"],["minijuegos","Minijuegos"],["estrategia","Estrategia"],["puzzles","Puzzles"],["coordenadas","Coordenadas"],["finales","Finales"]];
 const sideName=c=>c==="w"?"blancas":"negras";
-function stop(){if(cleanup){try{cleanup()}catch(e){}cleanup=null}keyH=null;A64.engine.cancel("learn")}
+function stop(){if(cleanup){try{cleanup()}catch(e){}cleanup=null}keyH=null;A64.engine.cancel("learn");A64.mgStop&&A64.mgStop()}
 
 /* ================= sesiones (plan del día y calentamiento) ================= */
 A64.session=null;
@@ -28,11 +28,12 @@ function show(el,arg){
   if(arg.tab)tab=arg.tab;
   if(arg.chapter)return chapter(A64.OPENINGS.find(o=>o.id===arg.chapter),arg.step||"idea");
   if(arg.drill)return drill(A64.OPENINGS.find(o=>o.id===arg.drill));
+  if(arg.mg){tab="minijuegos";root.innerHTML='<div id="lBody" class="stack"></div>';return A64.mgPlay($("#lBody",root),arg.mg,!!arg.daily,()=>show(root,{tab:"minijuegos"}))}
   root.innerHTML='<div class="hello"><h1>Aprender</h1><p>Entender las aperturas, los principios y la táctica, y practicarlos hasta que salgan solos.</p></div>'
     +'<div class="tabs" role="tablist">'+TABS.map(([k,n])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+n+"</button>").join("")+'</div><div id="lBody" class="stack"></div>';
   $$("[data-tab]",root).forEach(b=>b.onclick=()=>{tab=b.dataset.tab;show(root,{})});
   const body=$("#lBody",root);
-  ({aperturas:hubOpenings,estrategia:hubCards,puzzles:hubPuzzles,coordenadas:hubCoords,finales:hubEnd})[tab](body);
+  ({aperturas:hubOpenings,minijuegos:b=>A64.mgHub(b,()=>show(root,{tab:"minijuegos"})),estrategia:hubCards,puzzles:hubPuzzles,coordenadas:hubCoords,finales:hubEnd})[tab](body);
 }
 
 /* ================= aperturas ================= */
@@ -83,6 +84,7 @@ function chapter(op,step){
       $("#cBody",root).innerHTML='<div class="why">'+(idx===0?'<p class="lbl">Posición inicial</p><p>Tocá ▶ para ver la primera jugada y por qué se juega. La flecha verde marca la jugada que viene.</p>':'<span class="side">Jugada '+Math.ceil(idx/2)+' · '+(mine?"vos":"el rival")+' ('+sideName(last.color)+')</span><span class="mvh">'+F(last)+'</span><p>'+esc(op.moves[idx-1][1])+"</p>")+'</div>'
         +'<div class="row" style="gap:3px">'+line.map((m,i)=>'<button class="btn sm '+(i<idx?"":"ghost")+'" data-k="'+(i+1)+'" style="min-height:28px;padding:2px 7px">'+(i%2===0?((i/2+1)+". "):"")+F(posAt(line,i+1).last)+"</button>").join("")+'</div>'
         +(idx===n?'<button class="btn main" id="toPlan">Ver los planes</button>':"");
+      if(idx===n){S.opSeen=S.opSeen||[];if(!S.opSeen.includes(op.id)){S.opSeen.push(op.id);A64.save();A64.checkAch()}}
       $$("[data-k]",root).forEach(b=>b.onclick=()=>{idx=+b.dataset.k;paint()});if($("#toPlan",root))$("#toPlan",root).onclick=()=>setStep("planes");
       explorer(c.fen());
     }else bd.setArrows([]);
@@ -118,7 +120,7 @@ function drill(op,inSession){
     errors++;tries++;A64.Sound.error();bd.flash(mv.to,"bad");
     if(tries>=2){bd.setArrows([{from:want.from,to:want.to,color:"green"}]);say('<span class="bad">No es esa.</span> La jugada es '+F(want)+' (flecha verde). '+esc(op.moves[k][1]))}
     else say('<span class="bad">No es esa.</span> Probá otra vez. Pista: mové '+A64.ART[want.piece]+".")}
-  function end(){done=true;const ok=errors===0;const it=A64.srs.grade("op:"+op.id,ok);A64.bump("op");if(ok)A64.Sound.ok();
+  function end(){done=true;const ok=errors===0;const it=A64.srs.grade("op:"+op.id,ok);if(ok)A64.count("opPerfect");A64.bump("op");if(ok)A64.Sound.ok();setTimeout(()=>A64.flushAch(),900);
     say(ok?"<em>Perfecta.</em> La línea entera sin errores. Vuelve en "+[0,1,2,4,8,16,32][it.box]+" día"+(it.box>1?"s":"")+".":"Terminada con "+errors+" error"+(errors>1?"es":"")+". La repasamos mañana de nuevo.");
     const e=$("#dEnd",root);e.hidden=false;
     e.innerHTML=inSession?'<button class="btn main" id="dNext">Seguir</button>':'<button class="btn main" id="dAgain">Repetir</button><button class="btn" id="dPlay">Jugar desde acá</button><button class="btn ghost" id="dBack">Volver</button>';
@@ -148,8 +150,8 @@ function cards(n,inSessionFlag){
     $("#kSide",root).innerHTML='<div class="row"><span class="lbl">'+esc(c.phase)+'</span><span class="sp"></span><span class="mute">'+(i+1)+" / "+deck.length+'</span></div><div class="flash"><p style="font-size:17px;font-weight:600;color:var(--strong)">'+esc(c.q)+'</p><button class="btn main" id="kShow">Ver respuesta</button><div id="kAns" hidden><p class="rule">'+esc(c.rule)+'</p><p>'+esc(c.why)+'</p></div></div><div class="row" id="kGrade" hidden><button class="btn" id="kNo">No me acordaba</button><button class="btn main" id="kYes">Me acordaba</button></div>';
     $("#kShow",root).onclick=()=>{$("#kAns",root).hidden=false;$("#kGrade",root).hidden=false;$("#kShow",root).hidden=true};
     $("#kNo",root).onclick=()=>grade(false);$("#kYes",root).onclick=()=>grade(true)}
-  function grade(ok){A64.srs.grade("card:"+deck[i].id,ok);if(ok)good++;i++;A64.bump("cards");if(i<deck.length)return paint();
-    $("#kSide",root).innerHTML='<div class="flash"><p class="rule">Listo: '+good+" de "+deck.length+'</p><p>Las que no te acordaste vuelven mañana.</p>'+(inSession?'<button class="btn main" id="kNext">Seguir</button>':'<button class="btn main" id="kBack">Volver</button>')+"</div>";
+  function grade(ok){A64.srs.grade("card:"+deck[i].id,ok);if(ok){good++;A64.count("cardOk")}i++;A64.bump("cards");if(i<deck.length)return paint();
+    setTimeout(()=>A64.flushAch(),600);$("#kSide",root).innerHTML='<div class="flash"><p class="rule">Listo: '+good+" de "+deck.length+'</p><p>Las que no te acordaste vuelven mañana.</p>'+(inSession?'<button class="btn main" id="kNext">Seguir</button>':'<button class="btn main" id="kBack">Volver</button>')+"</div>";
     if(inSession)$("#kNext",root).onclick=()=>sessionNext();else $("#kBack",root).onclick=()=>show(root,{tab:"estrategia"})}
   paint();
 }
@@ -196,7 +198,7 @@ async function puzzles(n,easy){
     if(step>=cur.sol.length)return solved(true);say("<em>Bien.</em> Seguí: ¿y ahora?")}
   function solved(win){
     busy=true;const first=fails===0;
-    if(win){A64.Sound.ok();if(first){ok++;S.pzSolved=(S.pzSolved||0)+1;S.pzStreak=(S.pzStreak||0)+1}else S.pzStreak=0}
+    if(win){A64.Sound.ok();if(first){ok++;S.pzSolved=(S.pzSolved||0)+1;S.pzStreak=(S.pzStreak||0)+1;S.pzBest=Math.max(S.pzBest||0,S.pzStreak);if(cur.source==="own")A64.count("exOk")}else S.pzStreak=0}
     if(cur.source!=="lichess")A64.srs.grade(cur.id,win&&first);
     A64.bump("pz");info(win&&first?"Resuelto":win?"Resuelto con ayuda":"Solución");$("#zNext",root).hidden=false;$("#zHint",root).hidden=true;$("#zSol",root).hidden=true}
   function reveal(){fails=9;const c=new Chess(cur.fen),arrows=[];let last=null;for(const u of cur.sol){last=c.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||"q"});if(!last)break;arrows.push({from:last.from,to:last.to,color:arrows.length%2?"blue":"green"})}
@@ -206,7 +208,7 @@ async function puzzles(n,easy){
     if(cur.own)t+="<p>"+esc(cur.own.why||"")+"</p>"+(first?"<p>Lo correcto: "+esc(A64.describeMove(first))+"</p>":"");
     else if(first)t+="<p>"+esc(A64.describeMove(first))+"</p>";
     el.innerHTML=t;say(title==="Resuelto"?"<em>Muy bien.</em>":"Mirá la explicación y seguimos.")}
-  function end(){A64.save();A64.checkAch();if(ok===list.length&&list.length>=3)bd.confetti();
+  function end(){A64.save();A64.checkAch();setTimeout(()=>A64.flushAch(),800);if(ok===list.length&&list.length>=3)bd.confetti();
     $("#zSide",root).innerHTML='<div class="flash"><p class="score-big">'+ok+" / "+list.length+'</p><p class="rule">'+(ok===list.length?"Perfecto.":ok>=list.length/2?"Bien. Los que fallaste vuelven pronto.":"Los que fallaste vuelven mañana. Así se entrena el ojo.")+'</p>'+(inSession?'<button class="btn main" id="zGo">Seguir</button>':'<div class="row"><button class="btn main" id="zMore">Otros 5</button><button class="btn" id="zBack">Volver</button></div>')+"</div>";
     if(inSession)$("#zGo",root).onclick=()=>sessionNext();else{$("#zMore",root).onclick=()=>puzzles(5);$("#zBack",root).onclick=()=>show(root,{tab:"puzzles"})}}
   load();keyH=e=>{if(e.key==="f"||e.key==="F"){bd.flip();return true}return false};
@@ -222,7 +224,7 @@ function hubCoords(body){
   function tap(sq){if(!run)return;if(sq===target){score++;$("#cScore",body).textContent=score;bd.flash(sq,"mk-good");A64.Sound.move();pick()}else{bd.flash(sq,"bad");A64.Sound.error()}}
   $("#cStart",body).onclick=()=>{score=0;run=true;$("#cScore",body).textContent=0;pick();t0=performance.now();$("#cStart",body).disabled=true;
     iv=setInterval(()=>{const left=30-(performance.now()-t0)/1000;$("#cTime",body).textContent=Math.max(0,Math.ceil(left));if(left<=0){clearInterval(iv);run=false;$("#cTarget",body).textContent="¡Tiempo!";$("#cStart",body).disabled=false;$("#cStart",body).textContent="Otra vez";
-      const best=S.coordBest[side]||0;if(score>best){S.coordBest[side]=score;A64.toast("Récord",score+" casillas con "+(side==="w"?"blancas":"negras")+".");bd.confetti()}A64.markDay();A64.save();A64.checkAch()}},100)};
+      A64.count("coordRuns");const best=S.coordBest[side]||0;if(score>best){S.coordBest[side]=score;A64.toast("Récord",score+" casillas con "+(side==="w"?"blancas":"negras")+".");bd.confetti()}A64.markDay();A64.save();A64.checkAch()}},100)};
   cleanup=()=>clearInterval(iv);
 }
 
@@ -247,7 +249,7 @@ function endgame(eg){
     if(ch.in_stalemate()){over=true;A64.Sound.error();say('<span class="bad">Ahogado: tablas.</span> El rey negro no tenía jugadas y no estaba en jaque. Dejale siempre una casilla.');return true}
     if(ch.game_over()||(eg.goal==="queen"&&!/P/.test(ch.fen().split(" ")[0]))){over=true;say('<span class="bad">Se escapó.</span> Probá de nuevo con el método.');return true}
     return false}
-  function win(t){over=true;S.endWon=S.endWon||{};S.endWon[eg.id]=true;A64.Sound.win();bd.confetti();say("<em>"+esc(t)+"</em> "+(moves<=eg.par?"Mejor que la referencia.":"Funciona; con práctica sale en menos."));A64.markDay();A64.save();A64.checkAch()}
+  function win(t){over=true;S.endWon=S.endWon||{};S.endWon[eg.id]=true;if(moves<=eg.par)A64.count("endPar");setTimeout(()=>A64.flushAch(),1200);A64.Sound.win();bd.confetti();say("<em>"+esc(t)+"</em> "+(moves<=eg.par?"Mejor que la referencia.":"Funciona; con práctica sale en menos."));A64.markDay();A64.save();A64.checkAch()}
   $("#eHint",root).onclick=async()=>{if(busy||over)return;const r=await A64.engine.analyse(ch.fen(),{depth:14,prio:true,tag:"learn"});if(!r||!r.best)return;const m=A64.uciMove(ch.fen(),r.best);bd.setArrows([{from:m.from,to:m.to,color:"green"}]);say("Pista: "+F(m)+".")};
   $("#eReset",root).onclick=()=>endgame(eg);
 }

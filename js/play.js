@@ -62,7 +62,7 @@ function render(){
   root.innerHTML='<div class="play"><div class="bcol">'
    +'<div class="player" style="width:100%"><span class="avatar acc">'+AG.ini+'</span><span class="pn"><b>'+esc(AG.name)+'</b><span>'+AG.role+' · Nivel '+G.level+' · ≈'+A64.rating(G.level)+'</span></span>'+(G.clock?'<span class="clock" id="ckO"></span>':"")+'</div>'
    +'<div class="bstage" id="pStage"><div id="pBoard"></div><div class="nexo" id="pNexo" hidden></div></div>'
-   +'<div class="player" style="width:100%"><span class="avatar">'+esc(me.slice(0,2).toUpperCase())+'</span><span class="pn"><b>'+esc(me)+'</b><span>'+MODES[G.mode].name+(G.fromOp?" · desde "+esc(G.fromOp):"")+'</span></span>'+(G.clock?'<span class="clock" id="ckM"></span>':"")+'</div>'
+   +'<div class="player" style="width:100%">'+A64.avatarHTML()+'<span class="pn"><b>'+esc(me)+' <small class="mute">'+esc(A64.titleOf())+'</small></b><span>'+MODES[G.mode].name+(G.fromOp?" · desde "+esc(G.fromOp):"")+'</span></span>'+(G.clock?'<span class="clock" id="ckM"></span>':"")+'</div>'
    +'</div><div class="side">'
    +'<div class="coach" id="pCoach"><span class="avatar acc"><span>AF</span></span><div><div class="who"><b>Analista Ferreyra</b> · <span id="pTurn"></span></div><div class="say" id="pSay"></div></div></div>'
    +'<div class="card" id="pFeed" hidden></div>'
@@ -231,8 +231,9 @@ async function finish(reason,flagged){
   if(won){A64.Sound.win();board.confetti()}else A64.Sound.move();
   const sans=ch.history(),times=sans.map(()=>null);let k=0;sans.forEach((s,i)=>{if((i%2===0?"w":"b")===G.color&&i>=G.opPly)times[i]=G.times[k++]??null});
   const AG=A64.AGENTS[G.agent];
+  if(G.fromOp)A64.count("fromOp");
   const rec=A64.buildRecord({id:"an-"+Date.now(),source:"analista",sans,color:G.color,white:G.color==="w"?(S.user||"Vos"):AG.name,black:G.color==="b"?(S.user||"Vos"):AG.name,result:res,times,date:Date.now(),agent:G.agent,level:G.level,mode:G.mode,clockLabel:G.clockKey});
-  S.practice=null;if(rec)S.games.unshift(rec);
+  S.practice=null;if(rec){if(ch.in_stalemate())rec.endText="stalemate";S.games.unshift(rec)}
   if(cfg.agent==="rotar")S.agentIdx=(S.agentIdx+1)%4;
   A64.bump("game");A64.save();
   const oldL=S.level;
@@ -259,7 +260,8 @@ async function finish(reason,flagged){
    +'<p>'+(lost?"Esta se perdió, pero hay cosas para rescatar. ":"")+esc(good)+'</p>'
    +(top.length?'<div class="list">'+top.map(i=>{const m=rec.moves[i-1];return'<button class="item" data-ply="'+i+'"><span class="tag '+A64.VERD[rec.verd[i]].c+'">'+A64.VERD[rec.verd[i]].mk+'</span><span style="min-width:0"><div class="t">'+Math.ceil(i/2)+'. '+F(m)+'</div><div class="s">'+esc(A64.THEME_NAME[rec.themes[i]]||"Error")+'</div></span><span>›</span></button>'}).join("")+'</div>':"")
    +'<p class="tip" style="border-left:3px solid var(--acc);padding:6px 10px;background:var(--acc-soft)"><b>Para la próxima:</b> '+esc(next)+'</p>'
-   +(d?'<p><span class="pill acc">Nivel '+oldL+' → '+S.level+'</span> '+(d>0?"Subís: el próximo rival va a jugar mejor.":"Bajamos un escalón para que afiances.")+'</p>':"");
+   +(d?'<p><span class="pill acc">Nivel '+oldL+' → '+S.level+'</span> '+(d>0?"Subís: el próximo rival va a jugar mejor.":"Bajamos un escalón para que afiances.")+'</p>':"")+A64.achSummaryHTML();
+  S.achQ=[];A64.save();
   $$("[data-ply]",sb).forEach(b=>b.onclick=()=>{A64.closeModal();A64.go("revisar",{game:rec.id,ply:+b.dataset.ply})});
 }
 
@@ -267,6 +269,7 @@ A64.views.jugar={
   show(el,arg){root=el;if(arg&&arg.from){G=null;start(null,{from:arg.from})}else if(G&&!G.over){render();nextTurnSoft()}else setup()},
   leave(){if(G&&!G.over){save()}clearInterval(tick);A64.engine.cancel("play");if(G&&!G.over){G.gen++;G.busy=false}},
   refresh(){if(G&&!G.over){render();draw()}else if(!G)setup()},
+  active:()=>!!(G&&!G.over),
   key(e){if(!G||G.over)return false;if(e.key==="f"||e.key==="F"){board.flip();return true}if((e.key==="h"||e.key==="H")&&G.mode!=="torneo"){hint();return true}return false},
   start:(o)=>{A64.go("jugar");G=null;start(null,o)}
 };

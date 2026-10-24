@@ -135,7 +135,7 @@ async function learnMove(mv){const L=R.learn,g=R.g;if(!L||L.solved)return;const 
   let ok=evB&&evB.best&&evB.best.slice(0,4)===mv.from+mv.to;
   if(!ok){$("#rSay",root).innerHTML="<p>Lo verifico…</p>";const a=await A64.engine.analyse(L.ch.fen(),{depth:12,prio:true,tag:"learn"});if(a&&evB){const v=A64.classify(evB,a,m,evB.best);ok=v==="best"||v==="good"}}
   if(R.learn!==L)return;
-  if(ok){L.solved=true;A64.Sound.ok();const br=A64.bestReason(fenB,evB,m.color);$("#rSay",root).innerHTML="<p><b style='color:var(--good)'>¡Eso!</b> "+esc(F(m))+" funciona. "+(br&&br.move.san===m.san?esc(br.why):"")+"</p><button class='btn main' id='lNext'>Siguiente error</button>";bd.setArrows([{from:m.from,to:m.to,color:"green"}]);$("#lNext",root).onclick=()=>startLearn(L.k+1);
+  if(ok){L.solved=true;A64.Sound.ok();A64.count("lfm");A64.checkAch();const br=A64.bestReason(fenB,evB,m.color);$("#rSay",root).innerHTML="<p><b style='color:var(--good)'>¡Eso!</b> "+esc(F(m))+" funciona. "+(br&&br.move.san===m.san?esc(br.why):"")+"</p><button class='btn main' id='lNext'>Siguiente error</button>";bd.setArrows([{from:m.from,to:m.to,color:"green"}]);$("#lNext",root).onclick=()=>startLearn(L.k+1);
     const ex=S.ex[g.id+"-"+L.i];if(ex)A64.srs.grade("ex:"+ex.id,true);return}
   L.tries++;A64.Sound.error();await A64.sleep(500);L.ch.undo();bd.last=null;bd.position(L.ch.fen());
   if(L.tries>=2){L.solved=true;const x=A64.explain({fenB,move:g.moves[L.i-1],evB,evA:g.ev[L.i],verdict:g.verd[L.i],me:g.moves[L.i-1].color});
