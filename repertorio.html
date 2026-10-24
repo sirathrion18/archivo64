@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Repertorio a64</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: ficha de repertorio. Pestañas Blancas / Negras; una tarjeta por apertura con tablero
+   a la izquierda y la idea a la derecha; en celular, tablero arriba y texto abajo. Solo oscuro, como Archivo 64. */
+:root{
+  --bg:#0E0E0E; --panel:#151515; --panel2:#1C1C1B; --line:#2B2A28; --rule:#5A5A5A;
+  --fg:#EDEAE4; --mute:#A6A29B; --acc:#FF6A00; --acc-ink:#0E0E0E; --alert:#E5573F; --green:#86AC92;
+  --sq-l:#E6E1D7; --sq-d:#8E8B85;
+  --f-title:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --f-body:"Inter","Helvetica Neue",Arial,sans-serif;
+  --f-code:"Agency FB","Barlow Condensed","Oswald","Arial Narrow",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header .wrap{padding-block:22px 0;display:grid;gap:10px}
+.eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--f-code);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.eyebrow svg{height:16px;width:auto}
+h1{margin:0;font-family:var(--f-title);font-weight:700;font-size:clamp(28px,6vw,40px);line-height:1.05;letter-spacing:-.01em}
+h1 span{color:var(--acc)}
+.lede{margin:0;color:var(--mute);max-width:62ch}
+.key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--mute)}
+.key b{font-family:var(--f-code);font-size:15px;color:var(--fg);letter-spacing:.06em}
+.tabs{display:flex;gap:4px;margin-top:8px;border-bottom:1px solid var(--rule)}
+.tab{background:transparent;border:1px solid transparent;border-bottom:none;padding:10px 16px 9px;font-family:var(--f-code);font-size:17px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);cursor:pointer;border-radius:3px 3px 0 0;display:flex;align-items:center;gap:8px}
+.tab i{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--rule)}
+.tab.w i{background:#F2EDE3} .tab.b i{background:#2A1E16}
+.tab[aria-selected="true"]{color:var(--fg);background:var(--panel);border-color:var(--rule);position:relative;top:1px}
+main .wrap{padding-block:18px 40px;display:grid;gap:14px}
+.group{font-family:var(--f-code);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin:8px 0 -4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:16px;display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:20px;align-items:start}
+.card.today{border-color:var(--acc)}
+@media (max-width:720px){.card{grid-template-columns:minmax(0,1fr)}}
+.bcol{display:grid;gap:8px;min-width:0}
+.board{width:100%;max-width:100%;aspect-ratio:1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border:3px solid #2E2C29;box-shadow:0 0 0 1px var(--acc);user-select:none;-webkit-user-select:none}
+.sq{position:relative;min-width:0;min-height:0;overflow:hidden}
+.sq.l{background:var(--sq-l)} .sq.d{background:var(--sq-d)}
+.sq.fr::before,.sq.to::before{content:"";position:absolute;inset:0;background:rgba(255,106,0,.30)}
+.sq.to::before{background:rgba(255,106,0,.48)}
+.sq svg{position:absolute;z-index:1;left:0;bottom:2%;width:100%;height:94%;display:block}
+.sq i{position:absolute;z-index:2;font-style:normal;font-family:var(--f-code);font-size:11px;font-weight:700;line-height:1;color:#B4520C;pointer-events:none}
+.sq i.rk{top:2px;left:3px} .sq i.fl{bottom:2px;right:3px}
+.ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.btn{background:var(--panel2);border:1px solid var(--rule);border-radius:3px;min-height:42px;cursor:pointer;font-size:17px}
+.btn:hover{border-color:var(--fg)}
+.btn:disabled{opacity:.35;cursor:default}
+.step{font-family:var(--f-code);font-size:15px;letter-spacing:.06em;color:var(--mute);min-height:1.4em}
+.step b{color:var(--fg);font-weight:600}
+.tcol{display:grid;gap:10px;min-width:0}
+.thead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+h2{margin:0;font-family:var(--f-title);font-size:26px;font-weight:700;line-height:1.1}
+.chip{font-family:var(--f-code);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:2px;background:var(--acc);color:var(--acc-ink)}
+.chip.alt{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+.line{display:flex;flex-wrap:wrap;gap:3px;font-family:var(--f-code);font-size:17px;letter-spacing:.03em}
+.line .n{color:var(--mute);padding:2px 2px 2px 6px}
+.mv{background:none;border:1px solid transparent;border-radius:2px;padding:1px 6px;cursor:pointer;font-family:inherit;font-size:inherit;color:var(--fg)}
+.mv.core{font-weight:700}
+.mv.extra{color:var(--mute)}
+.mv:hover{border-color:var(--rule)}
+.mv.on{background:var(--acc);color:var(--acc-ink)}
+.lbl{font-family:var(--f-code);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 2px}
+.tcol p{margin:0;max-width:60ch}
+.ojo{border-left:3px solid var(--alert);padding:6px 10px;background:rgba(229,87,63,.08);font-size:14px}
+.ojo b{font-family:var(--f-code);letter-spacing:.12em;text-transform:uppercase;color:var(--alert);margin-right:6px}
+footer .wrap{padding-block:16px 30px;border-top:1px solid var(--line);font-size:13px;color:var(--mute);display:grid;gap:4px}
+body{margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gw" x1="0" x2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".38" stop-color="#F6F0E4"/><stop offset=".7" stop-color="#E2D6C0"/><stop offset="1" stop-color="#A8977A"/></linearGradient>
+    <linearGradient id="gb" x1="0" x2="1"><stop offset="0" stop-color="#6B4E3D"/><stop offset=".3" stop-color="#3A291F"/><stop offset=".7" stop-color="#1A120D"/><stop offset="1" stop-color="#050302"/></linearGradient>
+  </defs>
+</svg>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow"><span id="logo"></span><span>Archivo 64 · Repertorio</span></div>
+    <h1>Tus aperturas <span>para el torneo</span></h1>
+    <p class="lede">Cada tablero muestra la posición a la que querés llegar. Tocá ◀ ▶ o cualquier jugada para verla paso a paso. Las jugadas en negrita son la apertura; las grises, cómo suele seguir.</p>
+    <div class="key"><span><b>C</b> caballo</span><span><b>A</b> alfil</span><span><b>T</b> torre</span><span><b>D</b> dama</span><span><b>R</b> rey</span><span><b>O-O</b> enroque corto</span><span><b>x</b> captura</span></div>
+    <div class="tabs" role="tablist">
+      <button class="tab w" role="tab" id="tW" aria-selected="true" aria-controls="pW"><i></i>Con blancas</button>
+      <button class="tab b" role="tab" id="tB" aria-selected="false" aria-controls="pB"><i></i>Con negras</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap" id="pW" role="tabpanel" aria-labelledby="tW"></div>
+  <div class="wrap" id="pB" role="tabpanel" aria-labelledby="tB" hidden></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Las marcadas <b style="color:var(--acc)">Para hoy</b> son las que conviene jugar en el torneo: pocas cosas para recordar y planes claros.</span>
+    <span>Si el rival se sale del libreto: centro, caballos y alfiles afuera, enroque, y antes de cada jugada mirá qué piezas tuyas quedan atacadas.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+const POS={"italiana":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR","san":"e4","fr":"e2","to":"e4"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR","san":"e5","fr":"e7","to":"e5"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cf3","fr":"g1","to":"f3"},{"f":"r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cc6","fr":"b8","to":"c6"},{"f":"r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R","san":"Ac4","fr":"f1","to":"c4"},{"f":"r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R","san":"Ac5","fr":"f8","to":"c5"},{"f":"r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R","san":"c3","fr":"c2","to":"c3"},{"f":"r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R","san":"Cf6","fr":"g8","to":"f6"},{"f":"r1bqk2r/pppp1ppp/2n2n2/2b1p3/2BPP3/2P2N2/PP3PPP/RNBQK2R","san":"d4","fr":"d2","to":"d4"}],"londres":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR","san":"d4","fr":"d2","to":"d4"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR","san":"d5","fr":"d7","to":"d5"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR","san":"Af4","fr":"c1","to":"f4"},{"f":"rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR","san":"Cf6","fr":"g8","to":"f6"},{"f":"rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR","san":"e3","fr":"e2","to":"e3"},{"f":"rnbqkb1r/ppp2ppp/4pn2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR","san":"e6","fr":"e7","to":"e6"},{"f":"rnbqkb1r/ppp2ppp/4pn2/3p4/3P1B2/4PN2/PPP2PPP/RN1QKB1R","san":"Cf3","fr":"g1","to":"f3"},{"f":"rnbqkb1r/pp3ppp/4pn2/2pp4/3P1B2/4PN2/PPP2PPP/RN1QKB1R","san":"c5","fr":"c7","to":"c5"},{"f":"rnbqkb1r/pp3ppp/4pn2/2pp4/3P1B2/2P1PN2/PP3PPP/RN1QKB1R","san":"c3","fr":"c2","to":"c3"},{"f":"r1bqkb1r/pp3ppp/2n1pn2/2pp4/3P1B2/2P1PN2/PP3PPP/RN1QKB1R","san":"Cc6","fr":"b8","to":"c6"},{"f":"r1bqkb1r/pp3ppp/2n1pn2/2pp4/3P1B2/2PBPN2/PP3PPP/RN1QK2R","san":"Ad3","fr":"f1","to":"d3"}],"escocesa":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR","san":"e4","fr":"e2","to":"e4"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR","san":"e5","fr":"e7","to":"e5"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cf3","fr":"g1","to":"f3"},{"f":"r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cc6","fr":"b8","to":"c6"},{"f":"r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R","san":"d4","fr":"d2","to":"d4"},{"f":"r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R","san":"exd4","fr":"e5","to":"d4"},{"f":"r1bqkbnr/pppp1ppp/2n5/8/3NP3/8/PPP2PPP/RNBQKB1R","san":"Cxd4","fr":"f3","to":"d4"}],"gdama":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR","san":"d4","fr":"d2","to":"d4"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR","san":"d5","fr":"d7","to":"d5"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR","san":"c4","fr":"c2","to":"c4"},{"f":"rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR","san":"e6","fr":"e7","to":"e6"},{"f":"rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR","san":"Cc3","fr":"b1","to":"c3"},{"f":"rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR","san":"Cf6","fr":"g8","to":"f6"},{"f":"rnbqkb1r/ppp2ppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR","san":"Ag5","fr":"c1","to":"g5"}],"espanola":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR","san":"e4","fr":"e2","to":"e4"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR","san":"e5","fr":"e7","to":"e5"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cf3","fr":"g1","to":"f3"},{"f":"r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cc6","fr":"b8","to":"c6"},{"f":"r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R","san":"Ab5","fr":"f1","to":"b5"},{"f":"r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R","san":"a6","fr":"a7","to":"a6"},{"f":"r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R","san":"Aa4","fr":"b5","to":"a4"},{"f":"r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R","san":"Cf6","fr":"g8","to":"f6"},{"f":"r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1","san":"O-O","fr":"e1","to":"g1"}],"abierta":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR","san":"e4","fr":"e2","to":"e4"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR","san":"e5","fr":"e7","to":"e5"},{"f":"rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cf3","fr":"g1","to":"f3"},{"f":"r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cc6","fr":"b8","to":"c6"},{"f":"r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R","san":"Ac4","fr":"f1","to":"c4"},{"f":"r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R","san":"Cf6","fr":"g8","to":"f6"},{"f":"r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R","san":"d3","fr":"d2","to":"d3"},{"f":"r1bqk2r/ppppbppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R","san":"Ae7","fr":"f8","to":"e7"},{"f":"r1bqk2r/ppppbppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQ1RK1","san":"O-O","fr":"e1","to":"g1"},{"f":"r1bq1rk1/ppppbppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQ1RK1","san":"O-O","fr":"e8","to":"g8"}],"carokann":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR","san":"e4","fr":"e2","to":"e4"},{"f":"rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR","san":"c6","fr":"c7","to":"c6"},{"f":"rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR","san":"d4","fr":"d2","to":"d4"},{"f":"rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR","san":"d5","fr":"d7","to":"d5"},{"f":"rnbqkbnr/pp2pppp/2p5/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR","san":"Cc3","fr":"b1","to":"c3"},{"f":"rnbqkbnr/pp2pppp/2p5/8/3Pp3/2N5/PPP2PPP/R1BQKBNR","san":"dxe4","fr":"d5","to":"e4"},{"f":"rnbqkbnr/pp2pppp/2p5/8/3PN3/8/PPP2PPP/R1BQKBNR","san":"Cxe4","fr":"c3","to":"e4"},{"f":"rn1qkbnr/pp2pppp/2p5/5b2/3PN3/8/PPP2PPP/R1BQKBNR","san":"Af5","fr":"c8","to":"f5"}],"siciliana":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR","san":"e4","fr":"e2","to":"e4"},{"f":"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR","san":"c5","fr":"c7","to":"c5"},{"f":"rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"Cf3","fr":"g1","to":"f3"},{"f":"rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R","san":"d6","fr":"d7","to":"d6"},{"f":"rnbqkbnr/pp2pppp/3p4/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R","san":"d4","fr":"d2","to":"d4"},{"f":"rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R","san":"cxd4","fr":"c5","to":"d4"},{"f":"rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R","san":"Cxd4","fr":"f3","to":"d4"},{"f":"rnbqkb1r/pp2pppp/3p1n2/8/3NP3/8/PPP2PPP/RNBQKB1R","san":"Cf6","fr":"g8","to":"f6"},{"f":"rnbqkb1r/pp2pppp/3p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R","san":"Cc3","fr":"b1","to":"c3"},{"f":"rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R","san":"a6","fr":"a7","to":"a6"}],"qgd":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR","san":"d4","fr":"d2","to":"d4"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR","san":"d5","fr":"d7","to":"d5"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR","san":"c4","fr":"c2","to":"c4"},{"f":"rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR","san":"e6","fr":"e7","to":"e6"},{"f":"rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR","san":"Cc3","fr":"b1","to":"c3"},{"f":"rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR","san":"Cf6","fr":"g8","to":"f6"},{"f":"rnbqkb1r/ppp2ppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR","san":"Ag5","fr":"c1","to":"g5"},{"f":"rnbqk2r/ppp1bppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR","san":"Ae7","fr":"f8","to":"e7"}],"eslava":[{"f":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"},{"f":"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR","san":"d4","fr":"d2","to":"d4"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR","san":"d5","fr":"d7","to":"d5"},{"f":"rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR","san":"c4","fr":"c2","to":"c4"},{"f":"rnbqkbnr/pp2pppp/2p5/3p4/2PP4/8/PP2PPPP/RNBQKBNR","san":"c6","fr":"c7","to":"c6"},{"f":"rnbqkbnr/pp2pppp/2p5/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R","san":"Cf3","fr":"g1","to":"f3"},{"f":"rnbqkb1r/pp2pppp/2p2n2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R","san":"Cf6","fr":"g8","to":"f6"},{"f":"rnbqkb1r/pp2pppp/2p2n2/3p4/2PP4/4PN2/PP3PPP/RNBQKB1R","san":"e3","fr":"e2","to":"e3"},{"f":"rn1qkb1r/pp2pppp/2p2n2/3p1b2/2PP4/4PN2/PP3PPP/RNBQKB1R","san":"Af5","fr":"c8","to":"f5"}]};
+const OPS=[
+ {k:"italiana",side:"w",name:"Italiana",core:5,tag:"hoy",idea:"El alfil de c4 apunta a f7, la casilla más débil de las negras: solo la defiende el rey.",plan:"Enrocá, jugá c3 y después d4 para quedarte con el centro.",ojo:"Si las negras juegan 3...Cd4, no te comas el peón de e5 con el caballo: es una trampa que termina en mate."},
+ {k:"londres",side:"w",name:"Londres",core:5,tag:"alt",idea:"Siempre el mismo armado contra casi todo: d4, Af4, e3, Cf3, c3 y Ad3.",plan:"Enroque corto, después Cbd2 y recién ahí buscás atacar por el flanco de rey.",ojo:"Si las negras sacan la dama a b6 atacando b2, defendelo con Db3 o Dc1."},
+ {k:"escocesa",side:"w",name:"Escocesa",core:5,idea:"Abrís el centro en la jugada 3 y tu caballo queda fuerte en d4.",plan:"Desarrollá rápido: Cc3, Ac4 o Ae2, y enroque."},
+ {k:"gdama",side:"w",name:"Gambito de Dama",core:3,idea:"Ofrecés el peón de c4 para que las negras suelten el centro.",plan:"Ag5 clava al caballo de f6. Seguí con e3, Cf3 y enroque."},
+ {k:"espanola",side:"w",name:"Española",core:5,idea:"El alfil presiona al caballo de c6, que es el que defiende el peón de e5.",plan:"Enroque temprano, después Te1, c3 y d4. Sin apuro.",ojo:"...a6 ataca tu alfil: retrocedé a a4."},
+ {k:"abierta",side:"b",name:"Abierta (1...e5)",core:2,tag:"hoy",group:"Contra 1.e4",idea:"Respondés igual: peón al centro y caballos afuera.",plan:"Alfil a e7 o c5, enroque, y recién ahí pensá en atacar.",ojo:"Si las blancas sacan alfil a c4 y dama a h5 o f3 muy temprano, buscan mate en f7. Cubrilo con ...g6 o ...De7."},
+ {k:"carokann",side:"b",name:"Caro-Kann",core:4,idea:"c6 prepara d5: atacás el peón de e4 con una estructura muy firme.",plan:"Sacá el alfil a f5 antes de jugar e6, así no queda encerrado detrás de tus peones."},
+ {k:"siciliana",side:"b",name:"Siciliana",core:2,idea:"Peleás el centro desde el costado: tu peón de c se cambia por el de d4 de las blancas.",plan:"a6 evita que te molesten con Cb5 o Ab5. Seguí con e6 o e5, Ae7 y enroque.",ojo:"Es la más táctica de todas. Si te sentís inseguro, mejor 1...e5."},
+ {k:"qgd",side:"b",name:"Gambito de Dama Rehusado",core:4,tag:"hoy",group:"Contra 1.d4",idea:"No tomás el peón de c4: sostenés d5 con e6.",plan:"Ae7, enroque, y después Cbd7 y c6. Sólida y tranquila."},
+ {k:"eslava",side:"b",name:"Eslava",core:4,idea:"Igual de sólida, pero con c6 para sacar primero el alfil a f5.",plan:"Después e6, Cbd7, Ae7 o Ad6, y enroque."}];
+
+/* Logo y piezas de Archivo 64 */
+const GL={a:[".....",".....",".###.","....#",".####","#...#",".####"],"6":["..##.",".#...","#....","####.","#...#","#...#",".###."],"4":["...#.","..##.",".#.#.","#..#.","#####","...#.","...#."]};
+(function(){let r="",x=0;for(const ch of "a64"){GL[ch].forEach((row,y)=>[...row].forEach((c,i)=>{if(c==="#")r+='<rect x="'+(x+i)+'" y="'+y+'" width="1.02" height="1.02"/>'}));x+=6}
+  document.getElementById("logo").innerHTML='<svg viewBox="-.5 -.5 18 8" role="img" aria-label="a64"><g fill="#FF6A00" shape-rendering="crispEdges">'+r+"</g></svg>"})();
+const BASE='<path d="M24 134 C24 126 30 123 37 122 L63 122 C70 123 76 126 76 134 Z"/><ellipse cx="50" cy="134" rx="26" ry="3.6"/><path d="M31 122 C33 117 40 115 50 115 C60 115 67 117 69 122 Z"/>';
+const SH={
+ p:'<path d="M40 115 C43 104 45 96 45.5 89 L54.5 89 C55 96 57 104 60 115 Z"/><ellipse cx="50" cy="89" rx="11" ry="2.8"/><path d="M45 89 C46.5 85 47 83 47.5 81 L52.5 81 C53 83 53.5 85 55 89 Z"/><circle cx="50" cy="70" r="11.5"/>',
+ r:'<path d="M36.5 115 C38.5 100 39.5 87 39.5 74 L60.5 74 C60.5 87 61.5 100 63.5 115 Z"/><ellipse cx="50" cy="74" rx="13" ry="2.8"/><path d="M36 74 L36 52 L42.5 52 L42.5 58.5 L47 58.5 L47 52 L53 52 L53 58.5 L57.5 58.5 L57.5 52 L64 52 L64 74 Z"/>',
+ b:'<path d="M39.5 115 C43.5 101 46 89 46.5 78 L53.5 78 C54 89 56.5 101 60.5 115 Z"/><ellipse cx="50" cy="78" rx="10.5" ry="2.6"/><ellipse cx="50" cy="73" rx="8" ry="2.2"/><path d="M50 31 C63.5 41 64.5 57 57 70 L43 70 C35.5 57 36.5 41 50 31 Z"/><path d="M55.5 43 L46.5 56" fill="none" stroke-width="2.6"/><circle cx="50" cy="26.5" r="4.5"/>',
+ n:'<path d="M37 115 C39 107 40.5 101 41 97 L59 97 C59.5 101 61 107 63 115 Z"/><ellipse cx="50" cy="97" rx="12.5" ry="2.8"/><path d="M41.5 97 C39.5 87 41 78 47 70 C41.5 72 34 73.5 29 69.5 C25 66 26 60 31.5 56 C37.5 51 42.5 43 46 35 L48.5 24 L53.5 32.5 C66.5 34.5 74 49 71 67 C69.5 79 64.5 89 61 97 Z"/><path d="M53.5 33 C62 41 65.5 55 62.5 70 C61.5 77 59.5 84 58 90" fill="none" stroke-width="1.6"/>',
+ q:'<path d="M37.5 115 C42 101 45 87 45.5 74 L54.5 74 C55 87 58 101 62.5 115 Z"/><ellipse cx="50" cy="74" rx="11.5" ry="2.8"/><ellipse cx="50" cy="68" rx="9" ry="2.3"/><path d="M41 67 L33.5 40 L43 51 L46 31.5 L50 47 L54 31.5 L57 51 L66.5 40 L59 67 Z"/><circle cx="33.5" cy="37.5" r="3.4"/><circle cx="46" cy="29" r="3.4"/><circle cx="54" cy="29" r="3.4"/><circle cx="66.5" cy="37.5" r="3.4"/>',
+ k:'<path d="M37.5 115 C42 101 45 87 45.5 74 L54.5 74 C55 87 58 101 62.5 115 Z"/><ellipse cx="50" cy="74" rx="11.5" ry="2.8"/><ellipse cx="50" cy="68" rx="9" ry="2.3"/><path d="M41.5 67 C35.5 55 39 44.5 50 44.5 C61 44.5 64.5 55 58.5 67 Z"/><path d="M47.6 44.5 L47.6 36.5 L42 36.5 L42 31.5 L47.6 31.5 L47.6 21 L52.4 21 L52.4 31.5 L58 31.5 L58 36.5 L52.4 36.5 L52.4 44.5 Z"/>'};
+function piece(ch){const w=ch===ch.toUpperCase(),t=ch.toLowerCase();
+  return '<svg viewBox="0 0 100 140" preserveAspectRatio="xMidYMax meet"><g fill="'+(w?"url(#gw)":"url(#gb)")+'" stroke="'+(w?"#3A3127":"#000")+'" stroke-width="2" stroke-linejoin="round">'+BASE+SH[t]+'</g><path d="M31.5 121.6 C38 119.6 62 119.6 68.5 121.6" fill="none" stroke="#FF6A00" stroke-width="1.8"/>'+(t==="n"?'<circle cx="41.5" cy="49" r="2.4" fill="'+(w?"#2A2218":"#FF6A00")+'"/>':"")+"</svg>"}
+const F="abcdefgh";
+function grid(fen){const g=[];for(const row of fen.split("/")){const r=[];for(const c of row){if(/\d/.test(c))for(let i=0;i<+c;i++)r.push(null);else r.push(c)}g.push(r)}return g}
+function draw(el,st,flip){const g=grid(st.f);let h="";
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++){const r=flip?y:7-y,f=flip?7-x:x,sq=F[f]+(r+1),p=g[7-r][f];
+    const cls=["sq",(f+r)%2?"l":"d"];if(st.fr===sq)cls.push("fr");if(st.to===sq)cls.push("to");
+    h+='<div class="'+cls.join(" ")+'">'+(p?piece(p):"")+(x===0?'<i class="rk">'+(r+1)+"</i>":"")+(y===7?'<i class="fl">'+F[f]+"</i>":"")+"</div>"}
+  el.innerHTML=h}
+function card(o){
+  const st=POS[o.k],n=st.length-1,flip=o.side==="b";let i=n;
+  const el=document.createElement("article");el.className="card"+(o.tag==="hoy"?" today":"");
+  let line="";for(let k=1;k<=n;k++){if(k%2)line+='<span class="n">'+((k+1)/2)+".</span>";line+='<button class="mv '+(k<=o.core?"core":"extra")+'" data-k="'+k+'">'+st[k].san+"</button>"}
+  el.innerHTML='<div class="bcol"><div class="board" aria-label="Tablero: '+o.name+'"></div><div class="step"></div><div class="ctl"><button class="btn" data-a="0" aria-label="Inicio">⏮</button><button class="btn" data-a="-1" aria-label="Anterior">◀</button><button class="btn" data-a="1" aria-label="Siguiente">▶</button><button class="btn" data-a="9" aria-label="Final">⏭</button></div></div>'
+   +'<div class="tcol"><div class="thead"><h2>'+o.name+"</h2>"+(o.tag==="hoy"?'<span class="chip">Para hoy</span>':o.tag==="alt"?'<span class="chip alt">Alternativa para hoy</span>':"")+'</div><div class="line">'+line+'</div><div><p class="lbl">La idea</p><p>'+o.idea+'</p></div><div><p class="lbl">Cómo sigue</p><p>'+o.plan+"</p></div>"+(o.ojo?'<p class="ojo"><b>Ojo</b>'+o.ojo+"</p>":"")+"</div>";
+  const b=el.querySelector(".board"),s=el.querySelector(".step"),btn=el.querySelectorAll(".ctl .btn");
+  function go(k){i=Math.max(0,Math.min(n,k));draw(b,st[i],flip);
+    s.innerHTML=i===0?"Posición inicial":"Jugada "+Math.ceil(i/2)+" · "+(i%2?"blancas":"negras")+": <b>"+st[i].san+"</b>"+(i===n?" · posición final":"");
+    el.querySelectorAll(".mv").forEach(m=>m.classList.toggle("on",+m.dataset.k===i));
+    btn[0].disabled=btn[1].disabled=i===0;btn[2].disabled=btn[3].disabled=i===n}
+  btn[0].onclick=()=>go(0);btn[1].onclick=()=>go(i-1);btn[2].onclick=()=>go(i+1);btn[3].onclick=()=>go(n);
+  el.querySelector(".line").addEventListener("click",e=>{const m=e.target.closest(".mv");if(m)go(+m.dataset.k)});
+  go(n);return el}
+for(const o of OPS){const pan=document.getElementById(o.side==="w"?"pW":"pB");
+  if(o.group){const g=document.createElement("p");g.className="group";g.textContent=o.group;pan.appendChild(g)}pan.appendChild(card(o))}
+function tab(w){document.getElementById("pW").hidden=!w;document.getElementById("pB").hidden=w;document.getElementById("tW").setAttribute("aria-selected",w);document.getElementById("tB").setAttribute("aria-selected",!w);
+  try{history.replaceState(null,"",w?"#blancas":"#negras")}catch(e){}}
+document.getElementById("tW").onclick=()=>tab(true);document.getElementById("tB").onclick=()=>tab(false);
+tab(location.hash!=="#negras");
+})();
+</script>
+
+</body>
+</html>
