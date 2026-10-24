@@ -1,38 +1,21 @@
 # Archivo 64 (a64)
 
-Tu archivo de ajedrez: jugás contra el Analista Ferreyra, traés tus partidas de Lichess con los relojes y la app te corrige con consignas, ejercicios hechos con tus propios errores, gráficos y logros.
+Tu archivo de ajedrez: jugás contra los agentes de la oficina (niveles 1 a 30), aprendés aperturas, principios y táctica con repetición espaciada, y revisás tus partidas de Lichess con análisis de Stockfish 17.
 
-## Qué hay en esta carpeta
+## Secciones
+- **Inicio**: plan del día (aperturas, táctica, partida), calentamiento antes de un torneo, informe del último torneo y consigna del día.
+- **Jugar**: cuatro agentes (agresivo, posicional, tramposo, defensivo), nivel adaptativo 1–30, relojes 10+0 / 5+3 / 3+2, modos Entrenamiento / Normal / Torneo, empezar desde una apertura del repertorio.
+- **Aprender**: 17 aperturas en capítulos (idea, jugada por jugada con el porqué, planes, trampas, práctica), 24 tarjetas de estrategia, puzzles (tus errores, los de la oficina y de Lichess), juego de coordenadas, finales esenciales.
+- **Revisar**: precisión, gráfico de evaluación, explicación de cada error con su tema táctico, "aprendé de tus errores", uso del reloj e informe de torneo.
+- **Progreso**: consignas, errores por semana, rating, temas que más fallás, escalera del analista, logros y respaldo.
 
-| Archivo | Qué es |
-|---|---|
-| `index.html` | La app completa |
-| `manifest.webmanifest` | Nombre, colores e ícono para instalarla |
-| `sw.js` | Hace que abra rápido y funcione sin conexión |
-| `icons/` | Íconos y logos a64 (pixel, naranja sobre negro) |
-
-## Publicarla en GitHub Pages (una sola vez, gratis)
-
-1. Entrá a github.com y creá una cuenta.
-2. Botón **New repository**. Nombre: `archivo64`. Público. Crear.
-3. **Add file → Upload files**: arrastrá `index.html`, `manifest.webmanifest`, `sw.js` y la carpeta `icons`. **Commit changes**.
-4. **Settings → Pages**. En *Branch* elegí `main` y `/ (root)`. **Save**.
-5. En un minuto queda en `https://TU-USUARIO.github.io/archivo64/`.
-
-## Instalarla
-
-- **Celular (Android, Chrome):** abrí el link → menú ⋮ → **Instalar app**.
-- **iPhone (Safari):** abrí el link → compartir → **Agregar a inicio**.
-- **Compu (Chrome o Edge):** abrí el link → ícono de instalar en la barra de direcciones.
-
-## Respaldo
-
-Las partidas de Lichess se vuelven a bajar siempre. Lo que jugás contra el analista y tus ejercicios viven en el dispositivo: en **Progreso → Descargar respaldo**, y subí el archivo a esta carpeta de Drive.
+## Publicación
+GitHub Pages desde la rama `main`, carpeta raíz: https://sirathrion18.github.io/archivo64/
 
 ## Derechos
-
 © 2026 Ignacio Dubois. Todos los derechos reservados. Ver `LICENSE`: que el código esté a la vista no da permiso para copiarlo ni usarlo.
 
-## Reglas
+Componentes de terceros, con sus propias licencias: Stockfish 17.1 (`engine/`, GPL-3.0, ver `engine/COPYING-stockfish.txt`; código fuente en https://github.com/official-stockfish/Stockfish y https://github.com/nmrugg/stockfish.js) y chess.js (`js/chess.js`, BSD-2-Clause, ver `js/LICENSE-chess.js.txt`).
 
+## Reglas
 Solo partidas terminadas o contra el analista. Usar ayuda externa en una partida en vivo de Lichess está prohibido.
